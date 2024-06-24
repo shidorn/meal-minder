@@ -126,7 +126,7 @@ const Login = () => {
         onClose={closeForgotPasswordModal}
       >
         <h2 className="text-2xl mb-4">Forgot Password</h2>
-        <p>Enter your email to reset your password.</p>
+        <p className="mb-4 text-sm">Enter your email to reset your password.</p>
         <input
           type="email"
           value={email}
@@ -143,7 +143,7 @@ const Login = () => {
         onClose={closeCodeVerificationModal}
       >
         <h2 className="text-2xl mb-4">Enter Verification Code</h2>
-        <p>
+        <p className="mb-4 text-sm">
           We have sent a verification code to {email}. Please enter the code
           below.
         </p>
