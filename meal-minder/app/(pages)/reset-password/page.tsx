@@ -1,15 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Button from "@/app/components/buttons/button";
 import { useRouter } from "next/navigation";
 
 const ResetPassword = () => {
   const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleResetClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handleResetClick = () => {
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    // reset password logic here
     router.push("/login");
   };
 
@@ -34,7 +42,11 @@ const ResetPassword = () => {
         </div>
 
         <div className="flex flex-col items-center justify-center">
-          <form action="" className="flex flex-col gap-2 w-96">
+          <form
+            action=""
+            className="flex flex-col gap-2 w-96"
+            onSubmit={(e) => e.preventDefault()}
+          >
             <label htmlFor="password" className="font-medium pl-2">
               Your New Password
             </label>
@@ -42,7 +54,10 @@ const ResetPassword = () => {
               type="password"
               id="password"
               placeholder="Enter your new password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
+              required
             />
             <label htmlFor="confirmPassword" className="font-medium pl-2">
               Confirm Password
@@ -51,8 +66,13 @@ const ResetPassword = () => {
               type="password"
               id="confirmPassword"
               placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
+              required
             />
+
+            {error && <p className="text-red-500">{error}</p>}
 
             <Button title="Reset" onClick={handleResetClick} />
           </form>
