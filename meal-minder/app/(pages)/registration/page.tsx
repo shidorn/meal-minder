@@ -1,15 +1,52 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Button from "@/app/components/buttons/button";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const Register = () => {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
   const router = useRouter();
   const handleLoginClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     router.push("/login");
   };
+
+  const handleRegisterClick = async (
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    e.preventDefault();
+    try {
+      console.log(formData);
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/register",
+        formData
+      );
+      console.log(response);
+      if (response.status === 201) {
+        alert("Successfully Registered.");
+      } else {
+        alert("Registration Failed.");
+      }
+    } catch (error) {
+      console.log(error);
+      alert("Registration Failed.");
+      return error;
+    }
+  };
+
   return (
     <div className="container flex flex-row justify-around items-center p-6">
       <div className="flex flex-col items-center">
@@ -28,7 +65,7 @@ const Register = () => {
         </div>
 
         <div className="flex flex-col items-center justify-center">
-          <form action="" className="flex flex-col gap-2 w-96">
+          <form className="flex flex-col gap-2 w-96">
             <label htmlFor="" className="font-medium pl-2">
               Name
             </label>
@@ -36,6 +73,9 @@ const Register = () => {
               type="text"
               placeholder="Enter your full name"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
             />
             <label htmlFor="email" className="font-medium pl-2">
               Email
@@ -44,6 +84,9 @@ const Register = () => {
               type="email"
               placeholder="Enter your email"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
             />
             <label htmlFor="password" className="font-medium pl-2">
               Password
@@ -52,6 +95,9 @@ const Register = () => {
               type="password"
               placeholder="Enter your password"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
             />
             <a
               href=""
@@ -60,7 +106,8 @@ const Register = () => {
             >
               Login
             </a>
-            <Button title="Register" />
+            <Button title="Register" onClick={handleRegisterClick} />
+            {/* <button type="submit">Register</button> */}
           </form>
         </div>
       </div>

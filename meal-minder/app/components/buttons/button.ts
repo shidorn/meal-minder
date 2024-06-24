@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 interface ButtonProps {
   title: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 const Button: React.FC<ButtonProps> = ({ title, onClick }) => {

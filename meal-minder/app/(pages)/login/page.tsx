@@ -5,12 +5,45 @@ import Image from "next/image";
 import Button from "../../components/buttons/button";
 import { useRouter } from "next/navigation";
 import Modal from "@/app/components/modal/Modal";
+import axios from "axios";
 
 const Login = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
   const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const handleRegisterClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleLoginClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    try {
+      console.log(formData);
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/login",
+        formData
+      );
+      console.log(response);
+      if (response.status === 201) {
+        alert("Login Successfully");
+      }
+    } catch (error: any) {
+      console.log(error.message);
+      alert("Invalid Credentials");
+      return error;
+    }
+  };
+
+  const handleRegisterClick = async (
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) => {
     e.preventDefault();
     router.push("/registration");
   };
@@ -54,6 +87,9 @@ const Login = () => {
               type="email"
               placeholder="Enter your email"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
             />
             <label htmlFor="password" className="font-medium pl-2">
               Password
@@ -62,8 +98,11 @@ const Login = () => {
               type="password"
               placeholder="Enter your password"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
             />
-            <Button title="Login" />
+            <Button title="Login" onClick={handleLoginClick} />
             <a
               href=""
               className="text-red-900 hover:text-red-600 self-center"
