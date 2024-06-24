@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import Button from "../../components/buttons/button";
-import { useRouter } from "next/navigation";
+import Button from "@/app/components/buttons/button";
 import Modal from "@/app/components/modal/Modal";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -20,7 +20,12 @@ const Login = () => {
     });
   };
   const router = useRouter();
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isForgotPasswordModalVisible, setForgotPasswordModalVisible] =
+    useState(false);
+  const [isCodeVerificationModalVisible, setCodeVerificationModalVisible] =
+    useState(false);
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
 
   const handleLoginClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -52,11 +57,41 @@ const Login = () => {
     e: React.MouseEvent<HTMLAnchorElement>
   ) => {
     e.preventDefault();
-    setIsModalVisible(true);
+    setForgotPasswordModalVisible(true);
   };
 
-  const closeModal = () => {
-    setIsModalVisible(false);
+  const closeForgotPasswordModal = () => {
+    setForgotPasswordModalVisible(false);
+  };
+
+  const closeCodeVerificationModal = () => {
+    setCodeVerificationModalVisible(false);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  };
+
+  const handleForgotPasswordSubmit = async () => {
+    // Typically, send the email to the backend here
+    setForgotPasswordModalVisible(false);
+    setCodeVerificationModalVisible(true);
+  };
+
+  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCode(e.target.value);
+  };
+
+  const handleCodeVerificationSubmit = async () => {
+    // Typically, verify the code with the backend here
+    const isValid = true;
+
+    if (isValid) {
+      setCodeVerificationModalVisible(false);
+      router.push("/reset-password");
+    } else {
+      alert("Invalid code. Please try again.");
+    }
   };
 
   return (
@@ -124,20 +159,41 @@ const Login = () => {
         </div>
       </div>
 
-      <Modal isVisible={isModalVisible} onClose={closeModal}>
-        <h2 className="text-lg mb-2 font-medium">Forgot Password</h2>
-        <p className="text-sm mb-6 text-gray-500">
-          Please enter your email to reset your password.
-        </p>
-        <label htmlFor="" className="text-sm font-medium">
-          Your Email
-        </label>
+      {/* Forgot Password Modal */}
+      <Modal
+        isVisible={isForgotPasswordModalVisible}
+        onClose={closeForgotPasswordModal}
+      >
+        <h2 className="text-2xl mb-4">Forgot Password</h2>
+        <p>Enter your email to reset your password.</p>
         <input
           type="email"
+          value={email}
+          onChange={handleEmailChange}
           placeholder="Enter your email"
           className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
         />
-        <Button title="Submit" />
+        <Button title="Submit" onClick={handleForgotPasswordSubmit} />
+      </Modal>
+
+      {/* Code Verification Modal */}
+      <Modal
+        isVisible={isCodeVerificationModalVisible}
+        onClose={closeCodeVerificationModal}
+      >
+        <h2 className="text-2xl mb-4">Enter Verification Code</h2>
+        <p>
+          We have sent a verification code to {email}. Please enter the code
+          below.
+        </p>
+        <input
+          type="text"
+          value={code}
+          onChange={handleCodeChange}
+          placeholder="Enter your verification code"
+          className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
+        />
+        <Button title="Verify Code" onClick={handleCodeVerificationSubmit} />
       </Modal>
     </div>
   );
