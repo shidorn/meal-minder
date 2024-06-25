@@ -4,18 +4,51 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Button from "@/app/components/buttons/button";
 import Modal from "@/app/components/modal/Modal";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 
 const Login = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
   const router = useRouter();
   const [isForgotPasswordModalVisible, setForgotPasswordModalVisible] =
     useState(false);
   const [isCodeVerificationModalVisible, setCodeVerificationModalVisible] =
     useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState({ email: "" });
   const [code, setCode] = useState("");
 
-  const handleRegisterClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleLoginClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    try {
+      console.log(formData);
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/login",
+        formData
+      );
+      console.log(response);
+      if (response.status === 201) {
+        alert("Login Successfully");
+      }
+    } catch (error: any) {
+      console.log(error.message);
+      alert("Invalid Credentials");
+      return error;
+    }
+  };
+
+  const handleRegisterClick = async (
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) => {
     e.preventDefault();
     router.push("/registration");
   };
@@ -35,14 +68,39 @@ const Login = () => {
     setCodeVerificationModalVisible(false);
   };
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
+  const handleEmailChange = (e: any) => {
+    const { name, value } = e.target;
+    setEmail({
+      ...email,
+      [name]: value,
+    });
   };
 
-  const handleForgotPasswordSubmit = async () => {
+  const handleForgotPasswordSubmit = async (
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    e.preventDefault();
     // Typically, send the email to the backend here
-    setForgotPasswordModalVisible(false);
-    setCodeVerificationModalVisible(true);
+    try {
+      console.log(email);
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/forgot-pass",
+        email
+      );
+      console.log(response.data.message);
+      if (
+        response.data.message ==
+        "Password reset instructions sent to your email"
+      ) {
+        setForgotPasswordModalVisible(false);
+        setCodeVerificationModalVisible(true);
+      } else {
+        alert("Email not found");
+      }
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,11 +109,19 @@ const Login = () => {
 
   const handleCodeVerificationSubmit = async () => {
     // Typically, verify the code with the backend here
-    const isValid = true;
-
-    if (isValid) {
+    const emailData = {
+      email: email.email,
+      token: code,
+    };
+    console.log(emailData);
+    const response = await axios.post(
+      process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/verify-token",
+      emailData
+    );
+    console.log(response.data.valid);
+    if (response.data.valid) {
       setCodeVerificationModalVisible(false);
-      router.push("/reset-password");
+      router.push(`/reset-password?email=${encodeURIComponent(email.email)}`);
     } else {
       alert("Invalid code. Please try again.");
     }
@@ -89,6 +155,9 @@ const Login = () => {
               type="email"
               placeholder="Enter your email"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
             />
             <label htmlFor="password" className="font-medium pl-2">
               Password
@@ -97,8 +166,11 @@ const Login = () => {
               type="password"
               placeholder="Enter your password"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
             />
-            <Button title="Login" />
+            <Button title="Login" onClick={handleLoginClick} />
             <a
               href=""
               className="text-red-900 hover:text-red-600 self-center"
@@ -129,10 +201,11 @@ const Login = () => {
         <p className="mb-4 text-sm">Enter your email to reset your password.</p>
         <input
           type="email"
-          value={email}
-          onChange={handleEmailChange}
           placeholder="Enter your email"
           className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
+          name="email"
+          value={email.email}
+          onChange={handleEmailChange}
         />
         <Button title="Submit" onClick={handleForgotPasswordSubmit} />
       </Modal>
@@ -144,11 +217,13 @@ const Login = () => {
       >
         <h2 className="text-2xl mb-4">Enter Verification Code</h2>
         <p className="mb-4 text-sm">
-          We have sent a verification code to {email}. Please enter the code
+          We have sent a verification code to {email.email}. Please enter the code
           below.
         </p>
+        <input type="email" name="email" value={email.email} readOnly hidden />
         <input
           type="text"
+          name="code"
           value={code}
           onChange={handleCodeChange}
           placeholder="Enter your verification code"

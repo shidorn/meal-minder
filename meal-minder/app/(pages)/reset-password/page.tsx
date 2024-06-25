@@ -3,22 +3,44 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Button from "@/app/components/buttons/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import axios from "axios";
 
 const ResetPassword = () => {
   const router = useRouter();
+  const searchParam = useSearchParams();
+  const email = searchParam.get("email");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleResetClick = () => {
+  const handleResetClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
-    // reset password logic here
-    router.push("/login");
+    try {
+      const resetData = {
+        email: email,
+        newPassword: password,
+      };
+      console.log(resetData);
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/reset-password",
+        resetData
+      );
+      console.log(response);
+      if (response.data.message == "Password has been reset successfully") {
+        alert("Password has been reset successfully");
+        router.push("/login");
+      } else {
+        alert("Invalid or expired token");
+      }
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   };
 
   return (
