@@ -53,6 +53,10 @@ const Login = () => {
     router.push("/registration");
   };
 
+  const handleLoginClick = () => {
+    router.push("/dashboard");
+  };
+
   const handleForgotPasswordClick = (
     e: React.MouseEvent<HTMLAnchorElement>
   ) => {
@@ -194,7 +198,7 @@ const Login = () => {
 
       {/* Forgot Password Modal */}
       <Modal
-        isVisible={isForgotPasswordModalVisible}
+        isOpen={isForgotPasswordModalVisible}
         onClose={closeForgotPasswordModal}
       >
         <h2 className="text-2xl mb-4">Forgot Password</h2>
@@ -212,7 +216,7 @@ const Login = () => {
 
       {/* Code Verification Modal */}
       <Modal
-        isVisible={isCodeVerificationModalVisible}
+        isOpen={isCodeVerificationModalVisible}
         onClose={closeCodeVerificationModal}
       >
         <h2 className="text-2xl mb-4">Enter Verification Code</h2>
