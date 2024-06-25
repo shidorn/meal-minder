@@ -4,6 +4,7 @@ import Image from "next/image";
 import Button from "@/app/components/buttons/button";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { ClipLoader } from "react-spinners";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const Register = () => {
     });
   };
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const handleLoginClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     router.push("/login");
@@ -28,6 +30,7 @@ const Register = () => {
     e: React.MouseEvent<HTMLAnchorElement>
   ) => {
     e.preventDefault();
+    setLoading(true);
     try {
       console.log(formData);
       const response = await axios.post(
@@ -40,9 +43,11 @@ const Register = () => {
       } else {
         alert("Registration Failed.");
       }
+      setLoading(false);
     } catch (error) {
       console.log(error);
       alert("Registration Failed.");
+      setLoading(false);
       return error;
     }
   };
@@ -106,8 +111,12 @@ const Register = () => {
             >
               Login
             </a>
-            <Button title="Register" onClick={handleRegisterClick} />
-            {/* <button type="submit">Register</button> */}
+            <Button
+              title="Register"
+              onClick={handleRegisterClick}
+              disabled={loading}
+              loader={<ClipLoader size={24} />}
+            />
           </form>
         </div>
       </div>

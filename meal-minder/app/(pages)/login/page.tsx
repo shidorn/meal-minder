@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import Button from "@/app/components/buttons/button";
 import Modal from "@/app/components/modal/Modal";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { ClipLoader } from "react-spinners";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +19,10 @@ const Login = () => {
       ...formData,
       [name]: value,
     });
+    setError("");
+    setLoading(false);
   };
+
   const router = useRouter();
   const [isForgotPasswordModalVisible, setForgotPasswordModalVisible] =
     useState(false);
@@ -26,24 +30,56 @@ const Login = () => {
     useState(false);
   const [email, setEmail] = useState({ email: "" });
   const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLoginClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handlePassKeyPress = (e: any) => {
+    if (e.key === "Enter") {
+      handleLoginClick(e);
+    }
+  };
+
+  const handleEmailKeyPress = (e: any) => {
+    if (e.key === "Enter") {
+      handleLoginClick(e);
+    }
+  };
+
+  const handleLoginClick = async (e: any) => {
     e.preventDefault();
+    if (!validateEmail(formData.email)) {
+      setError("Invalid email");
+      return;
+    }
+    if (!formData.password) {
+      setError("Invalid password");
+
+      return;
+    }
+    setLoading(true);
     try {
-      console.log(formData);
       const response = await axios.post(
         process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/login",
         formData
       );
-      console.log(response);
-      if (response.status === 201) {
-        alert("Login Successfully");
+      console.log(response.data);
+      if (response.data.code === 1) {
+        router.push("/dashboard");
       }
     } catch (error: any) {
       console.log(error.message);
-      alert("Invalid Credentials");
-      return error;
+      setError("Invalid Credentials");
+      setLoading(false);
+      return;
     }
+  };
+
+  const validateEmail = (email: string) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
   };
 
   const handleRegisterClick = async (
@@ -76,9 +112,7 @@ const Login = () => {
     });
   };
 
-  const handleForgotPasswordSubmit = async (
-    e: React.MouseEvent<HTMLAnchorElement>
-  ) => {
+  const handleForgotPasswordSubmit = async (e: any) => {
     e.preventDefault();
     // Typically, send the email to the backend here
     try {
@@ -131,7 +165,13 @@ const Login = () => {
     <div className="container flex flex-row justify-around items-center p-6">
       {/* left side */}
       <div className="flex flex-col items-center">
-        <Image src={`/images/logo.png`} alt="logo" width={600} height={600} />
+        <Image
+          src={`/images/logo.png`}
+          alt="logo"
+          width={600}
+          height={600}
+          priority={true}
+        />
         <h1 className="text-3xl font-medium">
           Feeding Efficiency, one byte at a time!
         </h1>
@@ -158,7 +198,9 @@ const Login = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onKeyPress={handleEmailKeyPress}
             />
+            {/* {errors.email && <p>{errors.email.message}</p>} */}
             <label htmlFor="password" className="font-medium pl-2">
               Password
             </label>
@@ -169,8 +211,17 @@ const Login = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onKeyPress={handlePassKeyPress}
             />
-            <Button title="Login" onClick={handleLoginClick} />
+            {/* {errors.password && <p>{errors.password.message}</p>} */}
+            {error && <p className="text-red-500">{error}</p>}
+            <Button
+              title="Login"
+              onClick={handleLoginClick}
+              disabled={loading}
+              loader={<ClipLoader size={24} />}
+            />
+
             <a
               href=""
               className="text-red-900 hover:text-red-600 self-center"
@@ -217,8 +268,8 @@ const Login = () => {
       >
         <h2 className="text-2xl mb-4">Enter Verification Code</h2>
         <p className="mb-4 text-sm">
-          We have sent a verification code to {email.email}. Please enter the code
-          below.
+          We have sent a verification code to {email.email}. Please enter the
+          code below.
         </p>
         <input type="email" name="email" value={email.email} readOnly hidden />
         <input
