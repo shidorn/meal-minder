@@ -1,30 +1,34 @@
-import React, { ReactNode } from "react";
+import { FC, ReactNode } from "react";
 
 interface ModalProps {
-  isVisible: boolean;
+  isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ isVisible, onClose, children }) => {
-  if (!isVisible) return null;
+const Modal: FC<ModalProps> = ({ isOpen, onClose, children }) => {
+  const closeModal = () => {
+    onClose();
+  };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div
-        className="fixed inset-0 bg-black opacity-50"
-        onClick={onClose}
-      ></div>
-      <div className="bg-white p-8 rounded-lg shadow-md z-10">
-        {children}
-        {/* <button
-          onClick={onClose}
-          className="mt-4 p-2 bg-red-500 text-white rounded"
-        >
-          Close
-        </button> */}
-      </div>
-    </div>
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3">
+            <div className="flex justify-end p-2">
+              <button
+                className="text-gray-500 hover:text-gray-700"
+                onClick={closeModal}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="p-4">{children}</div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

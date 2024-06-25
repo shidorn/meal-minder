@@ -20,6 +20,10 @@ const Login = () => {
     router.push("/registration");
   };
 
+  const handleLoginClick = () => {
+    router.push("/dashboard");
+  };
+
   const handleForgotPasswordClick = (
     e: React.MouseEvent<HTMLAnchorElement>
   ) => {
@@ -98,7 +102,7 @@ const Login = () => {
               placeholder="Enter your password"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
             />
-            <Button title="Login" />
+            <Button title="Login" onClick={handleLoginClick} />
             <a
               href=""
               className="text-red-900 hover:text-red-600 self-center"
@@ -122,7 +126,7 @@ const Login = () => {
 
       {/* Forgot Password Modal */}
       <Modal
-        isVisible={isForgotPasswordModalVisible}
+        isOpen={isForgotPasswordModalVisible}
         onClose={closeForgotPasswordModal}
       >
         <h2 className="text-2xl mb-4">Forgot Password</h2>
@@ -139,7 +143,7 @@ const Login = () => {
 
       {/* Code Verification Modal */}
       <Modal
-        isVisible={isCodeVerificationModalVisible}
+        isOpen={isCodeVerificationModalVisible}
         onClose={closeCodeVerificationModal}
       >
         <h2 className="text-2xl mb-4">Enter Verification Code</h2>
