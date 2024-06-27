@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Button from "@/app/components/buttons/button";
 import Modal from "@/app/components/modal/Modal";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ClipLoader } from "react-spinners";
+import Cookies from "js-cookie";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -63,7 +64,8 @@ const Login = () => {
         formData
       );
       console.log(response.data);
-      if (response.data.code === 1) {
+      if (response.data) {
+        localStorage.setItem("token", response.data.access_token);
         router.push("/dashboard");
       }
     } catch (error: any) {
@@ -73,6 +75,15 @@ const Login = () => {
       return;
     }
   };
+
+  // useEffect(() => {
+  //   const token = Cookies.get("token");
+  //   // if (token) {
+  //   //   router.push("/dashboard");
+  //   // } else {
+  //   //   router.push("/login");
+  //   // }
+  // }, []);
 
   const validateEmail = (email: string) => {
     return String(email)

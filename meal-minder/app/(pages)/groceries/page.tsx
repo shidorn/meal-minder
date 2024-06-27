@@ -1,42 +1,74 @@
 "use client";
 import SearchBar from "@/app/components/search-bar/SearchBar";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
 import Breadcrumbs from "@/app/components/BreadCrumbs";
 import Modal from "@/app/components/modal/Modal";
+import axios from "axios";
 
 interface GroceryList {
-  id: number;
-  name: string;
-  dateCreated: string;
-  targetDate: string;
+  grocery_id: number;
+  grocery_name: string;
+  date_created: string;
+  target_date: string;
   status: string;
 }
 
-const initialFormData = {
-  name: "",
-  targetDate: "",
+const groceryListForm = {
+  grocery_name: "",
+  target_date: "",
 };
 
-const initialGroceryLists: GroceryList[] = [
-  {
-    id: 1,
-    name: "Weekly Shopping",
-    dateCreated: "2024-06-20",
-    targetDate: "2024-06-27",
-    status: "Pending",
-  },
-  // Add more initial grocery lists here if needed
-];
-
 const GroceryLists = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [formData, setFormData] = useState(initialFormData);
-  const [editItemId, setEditItemId] = useState<number | null>(null);
-  const [groceryLists, setGroceryLists] =
-    useState<GroceryList[]>(initialGroceryLists);
   const router = useRouter();
+  const [groceryLists, setGroceryLists] = useState<GroceryList[]>([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
+
+    const fetchData = async () => {
+      try {
+        const [response1, response2] = await Promise.all([
+          axios.get(
+            process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected",
+            config
+          ),
+          axios.get(
+            process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/grocery-list",
+            config
+          ),
+        ]);
+        const response2Data: GroceryList[] = response2.data;
+        const uniqueGroceryLists = new Set(
+          groceryLists.map((item) => item.grocery_id)
+        );
+        response2Data.forEach((item) => {
+          if (!uniqueGroceryLists.has(item.grocery_id)) {
+            uniqueGroceryLists.add(item.grocery_id);
+            groceryLists.push(item);
+          }
+        });
+        setGroceryLists((groceryLists) => [...groceryLists]);
+        console.log(groceryLists);
+      } catch (error) {
+        console.log(error);
+        router.push("/login");
+      }
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [formData, setFormData] = useState(groceryListForm);
+  const [editItemId, setEditItemId] = useState<number | null>(null);
+  // const [groceryLists, setGroceryLists] =
+  //   useState<GroceryList[]>(initialGroceryLists);
 
   const openModal = () => {
     setIsModalVisible(true);
@@ -44,7 +76,7 @@ const GroceryLists = () => {
 
   const closeModal = () => {
     setIsModalVisible(false);
-    setFormData(initialFormData);
+    setFormData(groceryListForm);
     setEditItemId(null);
   };
 
@@ -56,27 +88,34 @@ const GroceryLists = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAddOrUpdateItem = () => {
+  const handleAddOrUpdateItem = async () => {
     if (editItemId !== null) {
       // Update existing item
       const updatedLists = groceryLists.map((list) =>
-        list.id === editItemId
-          ? { ...list, name: formData.name, targetDate: formData.targetDate }
+        list.grocery_id === editItemId
+          ? {
+              ...list,
+              grocery_name: formData.grocery_name,
+              target_date: formData.target_date,
+            }
           : list
       );
       setGroceryLists(updatedLists);
     } else {
       // Add new item
-      const newList: GroceryList = {
-        id: groceryLists.length + 1,
-        name: formData.name,
-        dateCreated: new Date().toISOString().slice(0, 10),
-        targetDate: formData.targetDate,
-        status: "Pending",
-      };
-      setGroceryLists([...groceryLists, newList]);
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/add-grocery",
+        formData
+      );
+
+      console.log(response.data);
+      console.log(formData);
+      response.data.date_created = response.data.date_created
+        .toISOString()
+        .split("T")[0];
+      setGroceryLists([...groceryLists, response.data]);
     }
-    setFormData(initialFormData);
+    setFormData(groceryListForm);
     closeModal();
   };
 
@@ -104,32 +143,40 @@ const GroceryLists = () => {
               <th className="py-2 px-4 text-left">Action</th>
             </tr>
           </thead>
-          <tbody>
-            {groceryLists.map((list) => (
-              <tr key={list.id}>
-                <td className="border-t border-dashed py-2 px-4">
-                  {list.name}
-                </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  {list.dateCreated}
-                </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  {list.targetDate}
-                </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  {list.status}
-                </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  <button
-                    onClick={() => handleViewList(list.id)}
-                    className="px-4 py-2 text-red-900 rounded hover:bg-red-900 hover:text-white"
-                  >
-                    View List
-                  </button>
-                </td>
+          {groceryLists.length === 0 ? (
+            <tbody>
+              <tr>
+                <td>Loading ...</td>
               </tr>
-            ))}
-          </tbody>
+            </tbody>
+          ) : (
+            <tbody>
+              {groceryLists.map((list) => (
+                <tr key={list.grocery_id}>
+                  <td className="border-t border-dashed py-2 px-4">
+                    {list.grocery_name}
+                  </td>
+                  <td className="border-t border-dashed py-2 px-4">
+                    {list.date_created}
+                  </td>
+                  <td className="border-t border-dashed py-2 px-4">
+                    {list.target_date}
+                  </td>
+                  <td className="border-t border-dashed py-2 px-4">
+                    {list.status}
+                  </td>
+                  <td className="border-t border-dashed py-2 px-4">
+                    <button
+                      onClick={() => handleViewList(list.grocery_id)}
+                      className="px-4 py-2 text-red-900 rounded hover:bg-red-900 hover:text-white"
+                    >
+                      View List
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
 
         <button
@@ -146,8 +193,8 @@ const GroceryLists = () => {
           <div className="flex flex-col space-y-4 p-2">
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="grocery_name"
+              value={formData.grocery_name}
               onChange={handleInputChange}
               placeholder="Name"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
@@ -157,8 +204,8 @@ const GroceryLists = () => {
             </label>
             <input
               type="date"
-              name="targetDate"
-              value={formData.targetDate}
+              name="target_date"
+              value={formData.target_date}
               onChange={handleInputChange}
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
             />

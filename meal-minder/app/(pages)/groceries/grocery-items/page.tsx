@@ -1,9 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "@/app/components/modal/Modal";
 import Layout from "@/app/components/Layout";
 import Breadcrumbs from "@/app/components/BreadCrumbs";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface GroceryItem {
   id: number;
@@ -27,6 +29,23 @@ const initialGroceryItems: GroceryItem[] = [
 ];
 
 const GroceryItemsPage = () => {
+  const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    }
+
+    axios
+      .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .catch((error) => {
+        console.log(error);
+        router.push("/login");
+      });
+  }, [router]);
+
   const [groceryItems, setGroceryItems] =
     useState<GroceryItem[]>(initialGroceryItems);
   const [isModalOpen, setIsModalOpen] = useState(false);
