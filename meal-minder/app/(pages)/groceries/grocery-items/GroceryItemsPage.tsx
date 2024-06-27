@@ -51,10 +51,7 @@ const GroceryItemsPage = () => {
   const router = useRouter();
   const currentUser = { name: "Christine" };
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
+  const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
     setIsModalOpen(false);
     setFormData(initialFormData);
@@ -70,22 +67,20 @@ const GroceryItemsPage = () => {
       alert("Please fill out all fields with valid values.");
       return;
     }
-    if (editItemId !== null) {
-      const updatedItems = groceryItems.map((item) =>
-        item.id === editItemId
-          ? { ...item, ...formData, addedBy: currentUser.name }
-          : item
-      );
-      setGroceryItems(updatedItems);
-    } else {
-      const newItem: GroceryItem = {
-        id: groceryItems.length + 1,
-        ...formData,
-        addedBy: currentUser.name,
-        isPurchased: false,
-      };
-      setGroceryItems([...groceryItems, newItem]);
-    }
+
+    const newItem: GroceryItem = {
+      id: editItemId !== null ? editItemId : groceryItems.length + 1,
+      ...formData,
+      addedBy: currentUser.name,
+      isPurchased: false,
+    };
+
+    const updatedItems =
+      editItemId !== null
+        ? groceryItems.map((item) => (item.id === editItemId ? newItem : item))
+        : [...groceryItems, newItem];
+
+    setGroceryItems(updatedItems);
     closeModal();
   };
 
@@ -94,31 +89,30 @@ const GroceryItemsPage = () => {
     if (selectedItem) {
       setFormData(selectedItem);
       setEditItemId(id);
-      setIsModalOpen(true);
+      openModal();
     }
   };
 
   const handleDeleteItem = (id: number) => {
-    const updatedItems = groceryItems.filter((item) => item.id !== id);
-    setGroceryItems(updatedItems);
+    setGroceryItems(groceryItems.filter((item) => item.id !== id));
   };
 
   const handleCheckboxChange = (id: number) => {
-    const updatedItems = groceryItems.map((item) =>
-      item.id === id ? { ...item, isPurchased: !item.isPurchased } : item
+    setGroceryItems(
+      groceryItems.map((item) =>
+        item.id === id ? { ...item, isPurchased: !item.isPurchased } : item
+      )
     );
-    setGroceryItems(updatedItems);
   };
 
-  const isFormValid = () => {
-    return formData.name && formData.quantity > 0 && formData.category;
-  };
+  const isFormValid = () =>
+    formData.name && formData.quantity > 0 && formData.category;
 
   return (
     <Layout>
       <div className="container mx-auto p-4">
-        <div className="flex flex-row justify-between">
-          <div className="mb-6">
+        <div className="flex justify-between mb-6">
+          <div>
             <h1 className="text-3xl font-bold mb-4">Grocery Items</h1>
             <Breadcrumbs
               crumbs={[
@@ -145,27 +139,20 @@ const GroceryItemsPage = () => {
           </thead>
           <tbody>
             {groceryItems.map((item) => (
-              <tr key={item.id}>
-                <td className="border-t border-dashed py-2 px-4">
+              <tr key={item.id} className="border-t border-dashed">
+                <td className="py-2 px-4">
                   <input
                     type="checkbox"
                     checked={item.isPurchased}
                     onChange={() => handleCheckboxChange(item.id)}
+                    className="form-checkbox h-4 w-4 text-red-900"
                   />
                 </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  {item.name}
-                </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  {item.quantity}
-                </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  {item.category}
-                </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  {item.addedBy}
-                </td>
-                <td className="border-t border-dashed py-2 px-4 flex gap-4">
+                <td className="py-2 px-4">{item.name}</td>
+                <td className="py-2 px-4">{item.quantity}</td>
+                <td className="py-2 px-4">{item.category}</td>
+                <td className="py-2 px-4">{item.addedBy}</td>
+                <td className="py-2 px-4 flex gap-4">
                   <FaEdit
                     onClick={() => handleEditItem(item.id)}
                     className="text-yellow-500 cursor-pointer"
