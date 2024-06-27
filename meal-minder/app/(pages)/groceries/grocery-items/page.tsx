@@ -1,60 +1,81 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "@/app/components/modal/Modal";
 import Layout from "@/app/components/Layout";
 import Breadcrumbs from "@/app/components/BreadCrumbs";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/app/components/search-bar/SearchBar";
+import { useGroceryContext } from "@/contexts/GroceryContext";
 
-interface GroceryItem {
-  id: number;
-  name: string;
-  quantity: number;
-  category: string;
-  addedBy: string;
-  isPurchased: boolean;
-}
+// interface GroceryItem {
+//   id: number;
+//   name: string;
+//   quantity: number;
+//   category: string;
+//   addedBy: string;
+//   isPurchased: boolean;
+// }
 
-const initialFormData = {
-  name: "",
-  quantity: 0,
-  category: "",
-  addedBy: "",
-};
+// const initialFormData = {
+//   name: "",
+//   quantity: 0,
+//   category: "",
+//   addedBy: "",
+// };
 
-const initialGroceryItems: GroceryItem[] = [
-  {
-    id: 1,
-    name: "Apples",
-    quantity: 4,
-    category: "Fruit",
-    addedBy: "John",
-    isPurchased: false,
-  },
-  {
-    id: 2,
-    name: "Bread",
-    quantity: 2,
-    category: "Bakery",
-    addedBy: "Jane",
-    isPurchased: false,
-  },
-];
+// const initialGroceryItems: GroceryItem[] = [
+//   {
+//     id: 1,
+//     name: "Apples",
+//     quantity: 4,
+//     category: "Fruit",
+//     addedBy: "John",
+//     isPurchased: false,
+//   },
+//   {
+//     id: 2,
+//     name: "Bread",
+//     quantity: 2,
+//     category: "Bakery",
+//     addedBy: "Jane",
+//     isPurchased: false,
+//   },
+// ];
 
 const GroceryItemsPage = () => {
-  const [groceryItems, setGroceryItems] =
-    useState<GroceryItem[]>(initialGroceryItems);
+  const { groceryItems, setGroceryItems } = useGroceryContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState({
+    name: "",
+    quantity: 1,
+    category: "",
+    addedBy: "",
+  });
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const currentUser = { name: "Christine" };
+
+  const listId = searchParams.get("id");
+
+  useEffect(() => {
+    // Fetch items for the grocery list based on the listId
+    if (listId) {
+      // You would typically fetch data from an API here
+      console.log(`Fetching items for list id: ${listId}`);
+    }
+  }, [listId]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
     setIsModalOpen(false);
-    setFormData(initialFormData);
+    setFormData({
+      name: "",
+      quantity: 1,
+      category: "",
+      addedBy: "",
+    });
     setEditItemId(null);
   };
 
@@ -68,7 +89,7 @@ const GroceryItemsPage = () => {
       return;
     }
 
-    const newItem: GroceryItem = {
+    const newItem = {
       id: editItemId !== null ? editItemId : groceryItems.length + 1,
       ...formData,
       addedBy: currentUser.name,
@@ -145,7 +166,7 @@ const GroceryItemsPage = () => {
                     type="checkbox"
                     checked={item.isPurchased}
                     onChange={() => handleCheckboxChange(item.id)}
-                    className="form-checkbox h-4 w-4 text-red-900"
+                    className="form-checkbox h-4 w-4"
                   />
                 </td>
                 <td className="py-2 px-4">{item.name}</td>
@@ -173,7 +194,7 @@ const GroceryItemsPage = () => {
           Add New Item
         </button>
         <button
-          onClick={() => router.push("/groceries/inventory")}
+          onClick={() => router.push("/inventory")}
           className="text-red-900 hover:font-bold px-4 py-2 rounded mb-4 ml-6"
         >
           View Inventory
