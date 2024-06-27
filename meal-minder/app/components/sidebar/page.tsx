@@ -49,7 +49,7 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <Link href="/inventory">
+            <Link href="/groceries/inventory">
               <p className="hover:font-bold p-2 w-64 h-16 flex flex-row gap-6">
                 <MdOutlineInventory /> Inventory
               </p>
