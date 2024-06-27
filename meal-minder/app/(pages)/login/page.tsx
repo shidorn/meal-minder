@@ -38,6 +38,7 @@ const Login = () => {
       console.log(response);
       if (response.status === 201) {
         alert("Login Successfully");
+        router.push("/dashboard");
       }
     } catch (error: any) {
       console.log(error.message);
@@ -53,9 +54,9 @@ const Login = () => {
     router.push("/registration");
   };
 
-  const handleLoginClick = () => {
-    router.push("/dashboard");
-  };
+  // const handleLoginClick = () => {
+  //   router.push("/dashboard");
+  // };
 
   const handleForgotPasswordClick = (
     e: React.MouseEvent<HTMLAnchorElement>
@@ -221,8 +222,8 @@ const Login = () => {
       >
         <h2 className="text-2xl mb-4">Enter Verification Code</h2>
         <p className="mb-4 text-sm">
-          We have sent a verification code to {email.email}. Please enter the code
-          below.
+          We have sent a verification code to {email.email}. Please enter the
+          code below.
         </p>
         <input type="email" name="email" value={email.email} readOnly hidden />
         <input

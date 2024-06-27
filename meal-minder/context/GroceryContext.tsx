@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+"use client";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface GroceryItem {
   id: number;
@@ -33,18 +34,21 @@ const initialGroceryItems: GroceryItem[] = [
   },
 ];
 
-const GroceryContext = createContext<GroceryContextProps | undefined>(undefined);
+const GroceryContext = createContext<GroceryContextProps | undefined>(
+  undefined
+);
 
 export const useGroceryContext = () => {
   const context = useContext(GroceryContext);
   if (!context) {
-    throw new Error('useGroceryContext must be used within a GroceryProvider');
+    throw new Error("useGroceryContext must be used within a GroceryProvider");
   }
   return context;
 };
 
 export const GroceryProvider = ({ children }: { children: ReactNode }) => {
-  const [groceryItems, setGroceryItems] = useState<GroceryItem[]>(initialGroceryItems);
+  const [groceryItems, setGroceryItems] =
+    useState<GroceryItem[]>(initialGroceryItems);
 
   return (
     <GroceryContext.Provider value={{ groceryItems, setGroceryItems }}>
