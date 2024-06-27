@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useUser } from "@/app/context/UserProvider";
+import { useUser } from "@/context/UserProvider";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { FaPerson } from "react-icons/fa6";
 import { FaSignOutAlt, FaUser } from "react-icons/fa";

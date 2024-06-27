@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import Sidebar from "./sidebar/page";
-import { UserProvider } from "../context/UserProvider";
+import { UserProvider } from "../../context/UserProvider";
 import Header from "./header/header";
 
 interface LayoutProps {

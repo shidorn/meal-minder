@@ -6,7 +6,7 @@ import Breadcrumbs from "@/app/components/BreadCrumbs";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/app/components/search-bar/SearchBar";
-import { useGroceryContext } from "@/contexts/GroceryContext";
+import { useGroceryContext } from "@/context/GroceryContext";
 
 // interface GroceryItem {
 //   id: number;
