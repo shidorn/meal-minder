@@ -1,12 +1,19 @@
 "use client";
-import React, { useState } from "react";
+import React, { ForwardedRef, ReactNode, forwardRef, useState } from "react";
 
 interface ButtonProps {
   title: string;
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  disabled?: boolean;
+  loader?: ReactNode;
 }
 
-const Button: React.FC<ButtonProps> = ({ title, onClick }) => {
+const Button: React.FC<ButtonProps> = ({
+  title,
+  onClick,
+  disabled,
+  loader,
+}) => {
   const [hovered, setHovered] = useState(false);
 
   const buttonStyle: React.CSSProperties = {
@@ -35,10 +42,11 @@ const Button: React.FC<ButtonProps> = ({ title, onClick }) => {
     {
       style: buttonStyle,
       onClick: onClick,
+      disabled: disabled,
       onMouseEnter: handleMouseEnter,
       onMouseLeave: handleMouseLeave,
     },
-    title
+    disabled ? loader : title
   );
 };
 

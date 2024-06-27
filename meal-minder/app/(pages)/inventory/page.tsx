@@ -1,3 +1,28 @@
+<<<<<<< HEAD
+"use client";
+import React, { useEffect } from "react";
+import Layout from "@/app/components/Layout";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+
+const Inventory = () => {
+  const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    }
+
+    axios
+      .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .catch((error) => {
+        console.log(error);
+        router.push("/login");
+      });
+  }, [router]);
+=======
 
 import React from "react";
 import Layout from "@/app/components/Layout";
@@ -6,6 +31,7 @@ import { useGroceryContext } from "@/context/GroceryContext";
 const Inventory = () => {
   const { groceryItems } = useGroceryContext();
   const purchasedItems = groceryItems.filter(item => item.isPurchased);
+>>>>>>> 03d1ad34241ee2cd70894a228369d0588ac4c071
 
   return (
     <Layout>

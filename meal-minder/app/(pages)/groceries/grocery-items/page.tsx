@@ -4,47 +4,66 @@ import Modal from "@/app/components/modal/Modal";
 import Layout from "@/app/components/Layout";
 import Breadcrumbs from "@/app/components/BreadCrumbs";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/app/components/search-bar/SearchBar";
 import { useGroceryContext } from "@/context/GroceryContext";
 
-// interface GroceryItem {
-//   id: number;
-//   name: string;
-//   quantity: number;
-//   category: string;
-//   addedBy: string;
-//   isPurchased: boolean;
-// }
+interface GroceryItem {
+  id: number;
+  name: string;
+  quantity: number;
+  category: string;
+  addedBy: string;
+  isPurchased: boolean;
+}
 
-// const initialFormData = {
-//   name: "",
-//   quantity: 0,
-//   category: "",
-//   addedBy: "",
-// };
+const initialFormData = {
+  name: "",
+  quantity: 0,
+  category: "",
+  addedBy: "",
+};
 
-// const initialGroceryItems: GroceryItem[] = [
-//   {
-//     id: 1,
-//     name: "Apples",
-//     quantity: 4,
-//     category: "Fruit",
-//     addedBy: "John",
-//     isPurchased: false,
-//   },
-//   {
-//     id: 2,
-//     name: "Bread",
-//     quantity: 2,
-//     category: "Bakery",
-//     addedBy: "Jane",
-//     isPurchased: false,
-//   },
-// ];
+const initialGroceryItems: GroceryItem[] = [
+  {
+    id: 1,
+    name: "Apples",
+    quantity: 4,
+    category: "Fruit",
+    addedBy: "John",
+    isPurchased: false,
+  },
+  {
+    id: 2,
+    name: "Bread",
+    quantity: 2,
+    category: "Bakery",
+    addedBy: "Jane",
+    isPurchased: false,
+  },
+];
 
 const GroceryItemsPage = () => {
-  const { groceryItems, setGroceryItems } = useGroceryContext();
+  const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    }
+
+    axios
+      .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .catch((error) => {
+        console.log(error);
+        router.push("/login");
+      });
+  }, [router]);
+
+  const [groceryItems, setGroceryItems] =
+    useState<GroceryItem[]>(initialGroceryItems);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -53,7 +72,6 @@ const GroceryItemsPage = () => {
     addedBy: "",
   });
   const [editItemId, setEditItemId] = useState<number | null>(null);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const currentUser = { name: "Christine" };
 
