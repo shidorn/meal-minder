@@ -40,7 +40,6 @@ const initialGroceryItems: GroceryItem[] = [
     addedBy: "Jane",
     isPurchased: false,
   },
-  // Add more initial grocery items here if needed
 ];
 
 const GroceryItemsPage = () => {
@@ -50,7 +49,7 @@ const GroceryItemsPage = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const router = useRouter();
-  const currentUser = { name: "Christine" }; // Example: Replace with actual logged-in user info
+  const currentUser = { name: "Christine" };
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -109,6 +108,10 @@ const GroceryItemsPage = () => {
       item.id === id ? { ...item, isPurchased: !item.isPurchased } : item
     );
     setGroceryItems(updatedItems);
+  };
+
+  const isFormValid = () => {
+    return formData.name && formData.quantity > 0 && formData.category;
   };
 
   return (
@@ -228,9 +231,7 @@ const GroceryItemsPage = () => {
             <button
               onClick={handleAddOrUpdateItem}
               className="bg-red-900 text-white p-2 rounded hover:bg-red-800"
-              disabled={
-                !formData.name || !formData.quantity || !formData.category
-              }
+              disabled={!isFormValid()}
             >
               {editItemId !== null ? "Update Item" : "Add Item"}
             </button>
