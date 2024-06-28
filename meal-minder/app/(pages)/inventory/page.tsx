@@ -1,13 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
-import Layout;
+import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useGroceryContext } from "@/context/GroceryContext";
 
-
 const Inventory = () => {
-
   const router = useRouter();
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -25,7 +23,7 @@ const Inventory = () => {
       });
   }, [router]);
   const { groceryItems } = useGroceryContext();
-  const purchasedItems = groceryItems.filter(item => item.isPurchased);
+  const purchasedItems = groceryItems.filter((item) => item.isPurchased);
 
   return (
     <Layout>
@@ -44,7 +42,7 @@ const Inventory = () => {
               </tr>
             </thead>
             <tbody>
-              {purchasedItems.map(item => (
+              {purchasedItems.map((item) => (
                 <tr key={item.id} className="border-t border-dashed">
                   <td className="py-2 px-4">{item.name}</td>
                   <td className="py-2 px-4">{item.quantity}</td>
