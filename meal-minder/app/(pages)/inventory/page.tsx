@@ -54,6 +54,16 @@ const Inventory = () => {
     setCurrentPage(pageNumber);
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = purchasedItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(purchasedItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto p-4">

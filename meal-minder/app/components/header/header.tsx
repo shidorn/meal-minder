@@ -1,4 +1,6 @@
+
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { FaBell } from "react-icons/fa";
 import Image from "next/image";
@@ -48,15 +50,13 @@ const Header = () => {
     setIsDropDownVisible(!isDropDownVisible);
   };
 
+  const handleProfileClick = () => {
+    setIsDropDownVisible(!isDropDownVisible);
+  };
+
   return (
     <header className="w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md">
       <div className="flex items-center space-x-4">
-        {/* <Button
-          title="Logout"
-          onClick={handleLogoutClick}
-          disabled={loading}
-          loader={<ClipLoader size={24} />}
-        /> */}
         <button className="flex flex-row gap-2 items-center hover:text-red-900">
           <FaBell />
           <p>Notifications</p>
