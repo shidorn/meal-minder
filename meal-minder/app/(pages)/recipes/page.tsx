@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { GroceryItem } from "@/app/types/type";
 import { useGroceryContext } from "@/context/GroceryContext";
-import { FaStar, FaTimesCircle, FaTrash } from "react-icons/fa";
+import { FaStar, FaTrash } from "react-icons/fa";
 import { RiTimer2Line } from "react-icons/ri";
-import { GoShare } from "react-icons/go";
 import { FaShare } from "react-icons/fa6";
 import { PiCookingPotLight } from "react-icons/pi";
+import SearchBar from "@/app/components/search-bar/SearchBar";
+import Button from "@/app/components/buttons/button";
 
 interface RecipeProps {
   id: string;
@@ -87,7 +88,12 @@ const Recipes: React.FC<RecipeProps> = () => {
   return (
     <Layout>
       <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-4">Available Recipes</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold mb-4">Available Recipes</h1>
+          <div className="mr-72">
+            <SearchBar onSearch={() => {}} />
+          </div>
+        </div>
         {availableRecipes.length === 0 ? (
           <p>No recipes can be made with the current inventory.</p>
         ) : (
@@ -151,6 +157,7 @@ const Recipes: React.FC<RecipeProps> = () => {
             <FaTrash />
           </div>
         </div> */}
+        <Button title="Add recipes" />
       </div>
     </Layout>
   );
