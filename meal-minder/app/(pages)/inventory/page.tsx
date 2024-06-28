@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useGroceryContext } from "@/context/GroceryContext";
 import Pagination from "@/app/components/pagination/Pagination";
+import SearchBar from "@/app/components/search-bar/SearchBar";
 
 const Inventory = () => {
   const router = useRouter();
@@ -57,7 +58,12 @@ const Inventory = () => {
   return (
     <Layout>
       <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-4">Inventory</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold mb-4">Inventory</h1>
+          <div className="mr-72">
+            <SearchBar onSearch={() => {}} />
+          </div>
+        </div>
         {purchasedItems.length === 0 ? (
           <p>No items purchased yet.</p>
         ) : (

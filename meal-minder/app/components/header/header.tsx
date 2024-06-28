@@ -101,7 +101,6 @@ const Header = () => {
                 href="#"
                 className="flex items-center gap-4 font-medium px-4 py-2 text-red-900 hover:bg-gray-100"
                 onClick={handleLogoutClick}
-                download={<ClipLoader size={24} />}
               >
                 <GoSignOut />
                 Logout

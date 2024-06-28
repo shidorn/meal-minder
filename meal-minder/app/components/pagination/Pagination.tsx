@@ -1,4 +1,12 @@
 import React from "react";
+import { FaArrowAltCircleLeft, FaArrowLeft } from "react-icons/fa";
+import { FaArrowRight } from "react-icons/fa6";
+import { GoArrowDownLeft, GoArrowLeft } from "react-icons/go";
+import {
+  RiArrowDropLeftFill,
+  RiArrowDropLeftLine,
+  RiArrowDropRightLine,
+} from "react-icons/ri";
 
 interface PaginationProps {
   currentPage: number;
@@ -24,9 +32,10 @@ const Pagination: React.FC<PaginationProps> = ({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className=" flex items-center text-sm py-2 px-3 leading-tight text-red-900 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
-            Previous
+            <RiArrowDropLeftLine width={12} height={12} />
+            <p>Prev</p>
           </button>
         </li>
         {pageNumbers.map((number) => (
@@ -35,7 +44,7 @@ const Pagination: React.FC<PaginationProps> = ({
               onClick={() => onPageChange(number)}
               className={`py-2 px-3 leading-tight border border-gray-300 ${
                 number === currentPage
-                  ? "text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700"
+                  ? "text-red-900 bg-blue-50 hover:bg-blue-100 hover:text-blue-700"
                   : "text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700"
               }`}
             >
@@ -47,9 +56,10 @@ const Pagination: React.FC<PaginationProps> = ({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className="flex items-center text-sm py-2 px-3 leading-tight text-red-900 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
-            Next
+            <p>Next</p>
+            <RiArrowDropRightLine width={12} height={12} />
           </button>
         </li>
       </ul>
