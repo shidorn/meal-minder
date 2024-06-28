@@ -8,6 +8,7 @@ import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/app/components/search-bar/SearchBar";
 import { useGroceryContext } from "@/context/GroceryContext";
+import Pagination from "@/app/components/pagination/Pagination";
 
 interface GroceryItem {
   id: number;
@@ -71,6 +72,8 @@ const GroceryItemsPage = () => {
     category: "",
     addedBy: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const currentUser = { name: "Christine" };
@@ -146,6 +149,16 @@ const GroceryItemsPage = () => {
 
   const isFormValid = () =>
     formData.name && formData.quantity > 0 && formData.category;
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = groceryItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(groceryItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <Layout>
@@ -205,6 +218,12 @@ const GroceryItemsPage = () => {
             ))}
           </tbody>
         </table>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
         <button
           onClick={openModal}
           className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded mb-4"
