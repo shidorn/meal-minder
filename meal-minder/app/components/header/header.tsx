@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -46,10 +45,6 @@ const Header = () => {
     router.push("/login");
     // }
   };
-  const handleProfileClick = () => {
-    setIsDropDownVisible(!isDropDownVisible);
-  };
-
   const handleProfileClick = () => {
     setIsDropDownVisible(!isDropDownVisible);
   };
