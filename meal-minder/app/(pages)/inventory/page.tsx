@@ -29,7 +29,14 @@ const Inventory = () => {
   }, [router]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="absolute top-2/4 left-2/4">
+        <div className="flex flex-col gap-6 justify-center items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+          <span className="text-lg font-bold">Loading</span>
+        </div>
+      </div>
+    );
   }
 
   const purchasedItems = groceryItems.filter((item) => item.isPurchased);
