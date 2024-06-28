@@ -1,8 +1,16 @@
-import "../styles/globals.css";
+"use client";
 import type { AppProps } from "next/app";
+import { UserProvider } from "./context/UserProvider";
+import { GroceryProvider } from "./context/GroceryContext";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <UserProvider>
+      <GroceryProvider>
+      <Component {...pageProps} />
+      </GroceryProvider>
+    </UserProvider>
+  );
 }
 
 export default MyApp;
