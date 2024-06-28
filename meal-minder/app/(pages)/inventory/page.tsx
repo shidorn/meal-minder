@@ -4,11 +4,14 @@ import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useGroceryContext } from "@/context/GroceryContext";
+import Pagination from "@/app/components/pagination/Pagination";
 
 const Inventory = () => {
   const router = useRouter();
   const { groceryItems } = useGroceryContext();
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -41,6 +44,16 @@ const Inventory = () => {
 
   const purchasedItems = groceryItems.filter((item) => item.isPurchased);
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = purchasedItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(purchasedItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto p-4">
@@ -69,6 +82,12 @@ const Inventory = () => {
             </tbody>
           </table>
         )}
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </Layout>
   );
