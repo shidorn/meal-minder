@@ -5,6 +5,7 @@ interface PaginationProps {
   totalPages: number;
   onPageChange: (pageNumber: number) => void;
 }
+
 const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
@@ -15,6 +16,7 @@ const Pagination: React.FC<PaginationProps> = ({
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
+
   return (
     <nav className="flex justify-center">
       <ul className="inline-flex items-center -space-x-px">

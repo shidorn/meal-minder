@@ -43,6 +43,16 @@ const Inventory = () => {
   }
 
   const purchasedItems = groceryItems.filter((item) => item.isPurchased);
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = purchasedItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(purchasedItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
