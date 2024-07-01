@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import Breadcrumbs from "@/app/components/BreadCrumbs";
 import Modal from "@/app/components/modal/Modal";
 import axios from "axios";
+import {
+  checkTokenExpiration,
+  getAccessToken,
+  setupTokenExpirationCheck,
+  logout,
+} from "@/app/auth";
 
 interface GroceryList {
   grocery_id: number;
@@ -25,7 +31,13 @@ const GroceryLists = () => {
   const [groceryLists, setGroceryLists] = useState<GroceryList[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    checkTokenExpiration().catch(console.error);
+    setupTokenExpirationCheck();
+    const token = getAccessToken();
+    if (!token) {
+      logout(); // Redirect to login if no token is available
+      return;
+    }
     const config = {
       headers: { Authorization: `Bearer ${token}` },
     };
@@ -48,11 +60,19 @@ const GroceryLists = () => {
         );
         response2Data.forEach((item) => {
           if (!uniqueGroceryLists.has(item.grocery_id)) {
+            let dateCreateObj = new Date(item.date_created);
+            let dateCreateOnly = dateCreateObj.toISOString().split("T")[0];
+            let dateTargetObj = new Date(item.target_date);
+            let dateTargetOnly = dateTargetObj.toISOString().split("T")[0];
+
             uniqueGroceryLists.add(item.grocery_id);
+            item.date_created = dateCreateOnly;
+            item.target_date = dateTargetOnly;
             groceryLists.push(item);
           }
         });
         setGroceryLists((groceryLists) => [...groceryLists]);
+
         console.log(groceryLists);
       } catch (error) {
         console.log(error);
@@ -108,13 +128,9 @@ const GroceryLists = () => {
         formData
       );
 
-      console.log(response.data);
-      console.log(formData);
-      response.data.date_created = response.data.date_created
-        .toISOString()
-        .split("T")[0];
       setGroceryLists([...groceryLists, response.data]);
     }
+    console.log(groceryListForm);
     setFormData(groceryListForm);
     closeModal();
   };

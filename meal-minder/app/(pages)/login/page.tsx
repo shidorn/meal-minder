@@ -8,6 +8,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ClipLoader } from "react-spinners";
 import Cookies from "js-cookie";
+import { storeTokens } from "@/app/auth";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -65,7 +66,12 @@ const Login = () => {
       );
       console.log(response.data);
       if (response.data) {
-        localStorage.setItem("token", response.data.access_token);
+        storeTokens(
+          response.data.access_token,
+          response.data.refresh_token,
+          response.data.user.email
+        );
+        // localStorage.setItem("token", response.data.access_token);
         router.push("/dashboard");
       }
     } catch (error: any) {

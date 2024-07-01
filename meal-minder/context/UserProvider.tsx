@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 import React, {
   createContext,
   useContext,
@@ -8,6 +9,7 @@ import React, {
 } from "react";
 
 interface User {
+  user_id: string;
   name: string;
   profileImage: string;
 }
@@ -47,8 +49,18 @@ export const useUser = (): UserContextType => {
 };
 
 const getUserDataFromAPI = async (): Promise<User> => {
+  const email = {
+    userEmail: localStorage.getItem("email"),
+  };
+  console.log(email);
+  const response = await axios.post(
+    process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/getUser",
+    email
+  );
+  localStorage.setItem("user_name", response.data.username);
   return {
-    name: "Christine",
+    user_id: response.data.user_id,
+    name: response.data.username,
     profileImage: "/images/unnamed.jpg",
   };
 };

@@ -7,92 +7,80 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/app/components/search-bar/SearchBar";
-import { useGroceryContext } from "@/context/GroceryContext";
+import {
+  checkTokenExpiration,
+  getAccessToken,
+  setupTokenExpirationCheck,
+  logout,
+} from "@/app/auth";
 
 interface GroceryItem {
-  id: number;
-  name: string;
-  quantity: number;
-  category: string;
-  addedBy: string;
-  isPurchased: boolean;
+  item_id: number;
+  item_name: string;
+  item_quantity: number;
+  item_category: string;
+  user: { username: string };
+  is_purchase: boolean;
 }
-
-const initialFormData = {
-  name: "",
-  quantity: 0,
-  category: "",
-  addedBy: "",
-};
-
-const initialGroceryItems: GroceryItem[] = [
-  {
-    id: 1,
-    name: "Apples",
-    quantity: 4,
-    category: "Fruit",
-    addedBy: "John",
-    isPurchased: false,
-  },
-  {
-    id: 2,
-    name: "Bread",
-    quantity: 2,
-    category: "Bakery",
-    addedBy: "Jane",
-    isPurchased: false,
-  },
-];
 
 const GroceryItemsPage = () => {
   const router = useRouter();
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-    }
-
-    axios
-      .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .catch((error) => {
-        console.log(error);
-        router.push("/login");
-      });
-  }, [router]);
-
-  const [groceryItems, setGroceryItems] =
-    useState<GroceryItem[]>(initialGroceryItems);
+  const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    quantity: 1,
-    category: "",
-    addedBy: "",
+    item_name: "",
+    item_quantity: 1,
+    item_category: "",
   });
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const searchParams = useSearchParams();
-  const currentUser = { name: "Christine" };
+  const user = localStorage.getItem("user_name")?.toString();
+  const currentUser = { name: user };
 
   const listId = searchParams.get("id");
 
   useEffect(() => {
-    // Fetch items for the grocery list based on the listId
-    if (listId) {
-      // You would typically fetch data from an API here
-      console.log(`Fetching items for list id: ${listId}`);
-    }
-  }, [listId]);
+    checkTokenExpiration().catch(console.error);
+    setupTokenExpirationCheck();
+    const fetchData = async () => {
+      try {
+        const token = getAccessToken();
+        if (!token) {
+          logout(); // Redirect to login if no token is available
+          return;
+        }
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_API_ENDPOINT +
+            "/groceries/item-list/" +
+            listId,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const responseData: GroceryItem[] = response.data;
+        responseData.forEach((item) => {
+          groceryItems.push(item);
+        });
+        setGroceryItems((groceryItems) => [...groceryItems]);
+      } catch (error) {
+        console.log(error);
+        router.push("/login");
+      }
+    };
+    fetchData();
+  }, [router]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
     setIsModalOpen(false);
     setFormData({
-      name: "",
-      quantity: 1,
-      category: "",
-      addedBy: "",
+      item_name: "",
+      item_quantity: 1,
+      item_category: "",
+      // user_id: "",
     });
     setEditItemId(null);
   };
@@ -101,30 +89,55 @@ const GroceryItemsPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAddOrUpdateItem = () => {
-    if (!formData.name || formData.quantity <= 0 || !formData.category) {
+  const handleAddOrUpdateItem = async () => {
+    if (
+      !formData.item_name ||
+      formData.item_quantity <= 0 ||
+      !formData.item_category
+    ) {
       alert("Please fill out all fields with valid values.");
       return;
     }
 
-    const newItem = {
-      id: editItemId !== null ? editItemId : groceryItems.length + 1,
-      ...formData,
-      addedBy: currentUser.name,
-      isPurchased: false,
-    };
+    if (editItemId === null) {
+      const newItem = {
+        ...formData,
+        grocery_id: parseInt(listId ?? ""),
+        user_id: parseInt(localStorage.getItem("user_id") ?? ""),
+      };
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/add-item",
+        newItem
+      );
+      console.log(response.data);
+      setGroceryItems([...groceryItems, response.data]);
+    } else {
+      const updateFormData = {
+        item_name: formData.item_name,
+        item_quantity: parseInt(formData.item_quantity.toString()),
+        item_category: formData.item_category,
+        grocery_id: parseInt(listId ?? ""),
+        user_id: parseInt(localStorage.getItem("user_id") ?? ""),
+      };
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT +
+          "/groceries/update-item/" +
+          editItemId,
+        updateFormData
+      );
+      console.log(response.data);
+      const updatedItems = groceryItems.map((item) =>
+        item.item_id === editItemId ? { ...item, ...updateFormData } : item
+      );
+      setGroceryItems(updatedItems);
+    }
 
-    const updatedItems =
-      editItemId !== null
-        ? groceryItems.map((item) => (item.id === editItemId ? newItem : item))
-        : [...groceryItems, newItem];
-
-    setGroceryItems(updatedItems);
     closeModal();
   };
 
   const handleEditItem = (id: number) => {
-    const selectedItem = groceryItems.find((item) => item.id === id);
+    const selectedItem = groceryItems.find((item) => item.item_id === id);
+    console.log(selectedItem);
     if (selectedItem) {
       setFormData(selectedItem);
       setEditItemId(id);
@@ -132,20 +145,33 @@ const GroceryItemsPage = () => {
     }
   };
 
-  const handleDeleteItem = (id: number) => {
-    setGroceryItems(groceryItems.filter((item) => item.id !== id));
+  const handleDeleteItem = async (id: number) => {
+    console.log(id);
+    const item_id = { id: id };
+    const response = await axios.post(
+      process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/delete-item",
+      item_id
+    );
+    console.log(response.data);
+    setGroceryItems(groceryItems.filter((item) => item.item_id !== id));
   };
 
-  const handleCheckboxChange = (id: number) => {
+  const handleCheckboxChange = async (id: number, status: boolean) => {
+    const response = await axios.post(
+      process.env.NEXT_PUBLIC_API_ENDPOINT +
+        "/groceries/update-item-status/" +
+        id,
+      { is_purchase: !status }
+    );
     setGroceryItems(
       groceryItems.map((item) =>
-        item.id === id ? { ...item, isPurchased: !item.isPurchased } : item
+        item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
       )
     );
   };
 
   const isFormValid = () =>
-    formData.name && formData.quantity > 0 && formData.category;
+    formData.item_name && formData.item_quantity > 0 && formData.item_category;
 
   return (
     <Layout>
@@ -178,26 +204,34 @@ const GroceryItemsPage = () => {
           </thead>
           <tbody>
             {groceryItems.map((item) => (
-              <tr key={item.id} className="border-t border-dashed">
+              <tr key={item.item_id} className="border-t border-dashed">
                 <td className="py-2 px-4">
                   <input
                     type="checkbox"
-                    checked={item.isPurchased}
-                    onChange={() => handleCheckboxChange(item.id)}
+                    checked={item.is_purchase}
+                    onChange={() =>
+                      handleCheckboxChange(item.item_id, item.is_purchase)
+                    }
                     className="form-checkbox h-4 w-4"
                   />
                 </td>
-                <td className="py-2 px-4">{item.name}</td>
-                <td className="py-2 px-4">{item.quantity}</td>
-                <td className="py-2 px-4">{item.category}</td>
-                <td className="py-2 px-4">{item.addedBy}</td>
+                <td className="py-2 px-4">{item.item_name}</td>
+                <td className="py-2 px-4">{item.item_quantity}</td>
+                <td className="py-2 px-4">{item.item_category}</td>
+                <td className="py-2 px-4">
+                  {item.user && item.user.username
+                    ? item.user.username
+                    : currentUser
+                    ? currentUser.name
+                    : "User Not Available"}
+                </td>
                 <td className="py-2 px-4 flex gap-4">
                   <FaEdit
-                    onClick={() => handleEditItem(item.id)}
+                    onClick={() => handleEditItem(item.item_id)}
                     className="text-yellow-500 cursor-pointer"
                   />
                   <FaTrash
-                    onClick={() => handleDeleteItem(item.id)}
+                    onClick={() => handleDeleteItem(item.item_id)}
                     className="text-red-500 cursor-pointer"
                   />
                 </td>
@@ -225,31 +259,31 @@ const GroceryItemsPage = () => {
           <div className="flex flex-col space-y-4 p-6">
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="item_name"
+              value={formData.item_name}
               onChange={handleInputChange}
               placeholder="Name"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
             />
             <input
               type="number"
-              name="quantity"
-              value={formData.quantity}
+              name="item_quantity"
+              value={formData.item_quantity}
               onChange={handleInputChange}
               placeholder="Quantity"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
             />
             <input
               type="text"
-              name="category"
-              value={formData.category}
+              name="item_category"
+              value={formData.item_category}
               onChange={handleInputChange}
               placeholder="Category"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
             />
             <input
               type="text"
-              name="addedBy"
+              name="user_id"
               value={currentUser.name}
               readOnly
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
