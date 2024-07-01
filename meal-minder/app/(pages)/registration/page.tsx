@@ -39,7 +39,8 @@ const Register = () => {
       );
       console.log(response);
       if (response.status === 201) {
-        alert("Successfully Registered.");
+        // alert("Successfully Registered.");
+        router.push("/login");
       } else {
         alert("Registration Failed.");
       }
