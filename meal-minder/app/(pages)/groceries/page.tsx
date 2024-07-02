@@ -153,8 +153,8 @@ const GroceryLists = () => {
           <thead className="bg-gray-200">
             <tr>
               <th className="py-2 px-4 text-left">Name</th>
-              <th className="py-2 px-4 text-left">Date Created</th>
-              <th className="py-2 px-4 text-left">Target Date</th>
+              {/* <th className="py-2 px-4 text-left">Date Created</th> */}
+              <th className="py-2 px-4 text-left">Date Needed</th>
               <th className="py-2 px-4 text-left">Status</th>
               <th className="py-2 px-4 text-left">Action</th>
             </tr>
@@ -162,32 +162,46 @@ const GroceryLists = () => {
           {groceryLists.length === 0 ? (
             <tbody>
               <tr>
-                <td>Loading ...</td>
+                <td></td>
+                <td className="py-6">
+                  <div className="flex flex-col gap-6 justify-center items-center space-x-2">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+                    <span className="text-lg font-bold">Loading</span>
+                  </div>
+                </td>
+                <td></td>
+                <td></td>
               </tr>
             </tbody>
           ) : (
             <tbody>
               {groceryLists.map((list) => (
                 <tr key={list.grocery_id}>
-                  <td className="border-t border-dashed py-2 px-4">
+                  <td className="border-t border-dashed p-6">
                     {list.grocery_name}
                   </td>
-                  <td className="border-t border-dashed py-2 px-4">
+                  {/* <td className="border-t border-dashed py-2 px-4">
                     {list.date_created}
-                  </td>
+                  </td> */}
                   <td className="border-t border-dashed py-2 px-4">
                     {list.target_date}
                   </td>
-                  <td className="border-t border-dashed py-2 px-4">
+                  <td
+                    className={`${
+                      list.status === "Pending"
+                        ? "text-yellow-600"
+                        : "text-green-700"
+                    } border-b border-dashed`}
+                  >
                     {list.status}
                   </td>
                   <td className="border-t border-dashed py-2 px-4">
-                    <button
+                    <a
                       onClick={() => handleViewList(list.grocery_id)}
-                      className="px-4 py-2 text-red-900 rounded hover:bg-red-900 hover:text-white"
+                      className="text-red-900 rounded  hover:font-semibold cursor-pointer"
                     >
                       View List
-                    </button>
+                    </a>
                   </td>
                 </tr>
               ))}

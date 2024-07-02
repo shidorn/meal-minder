@@ -1,16 +1,16 @@
 "use client";
-import type { AppProps } from "next/app";
-import { UserProvider } from "./context/UserProvider";
-import { GroceryProvider } from "./context/GroceryContext";
+import { ReactNode } from "react";
+import { UserProvider } from "@/context/UserProvider";
+import { GroceryProvider } from "@/context/GroceryContext";
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <UserProvider>
-      <GroceryProvider>
-      <Component {...pageProps} />
-      </GroceryProvider>
-    </UserProvider>
+    <html lang="en">
+      <body>
+        <UserProvider>
+          <GroceryProvider>{children}</GroceryProvider>
+        </UserProvider>
+      </body>
+    </html>
   );
 }
-
-export default MyApp;

@@ -13,6 +13,7 @@ import {
   setupTokenExpirationCheck,
   logout,
 } from "@/app/auth";
+import Pagination from "@/app/components/pagination/Pagination";
 
 interface GroceryItem {
   item_id: number;
@@ -32,6 +33,8 @@ const GroceryItemsPage = () => {
     item_quantity: 1,
     item_category: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const user = localStorage.getItem("user_name")?.toString();
@@ -172,6 +175,16 @@ const GroceryItemsPage = () => {
 
   const isFormValid = () =>
     formData.item_name && formData.item_quantity > 0 && formData.item_category;
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = groceryItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(groceryItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <Layout>
@@ -239,6 +252,12 @@ const GroceryItemsPage = () => {
             ))}
           </tbody>
         </table>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
         <button
           onClick={openModal}
           className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded mb-4"
