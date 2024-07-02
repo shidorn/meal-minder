@@ -1,7 +1,8 @@
 import React, { ReactNode } from "react";
 import Sidebar from "./sidebar/page";
-import { UserProvider } from "../../context/UserProvider";
+
 import Header from "./header/header";
+import { AuthProvider } from "../utils/authContext";
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,15 +10,17 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <UserProvider>
-      <div className="flex h-full w-full bg-gray-100">
+    <AuthProvider>
+      <div className="flex h-screen w-full bg-gray-100">
         <Sidebar />
-        <div className="flex flex-col flex-1">
+
+        <div className="flex flex-col flex-1 ml-64 ">
           <Header />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+
+          <main className="flex-1 overflow-y-auto p-6 z-10">{children}</main>
         </div>
       </div>
-    </UserProvider>
+    </AuthProvider>
   );
 };
 
