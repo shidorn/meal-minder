@@ -44,14 +44,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     if (platform === "copy") {
       navigator.clipboard.writeText(recipeUrl);
       alert("Link copied to clipboard!");
-    } else if (navigator.share) {
-      navigator
-        .share({
-          title: name,
-          text: `Check out this recipe: ${name}`,
-          url: recipeUrl,
-        })
-        .catch((error) => console.log("Error sharing:", error));
+    } else if (platform === "family") {
+      // Add your logic to share with family members here
+      alert("Shared with family members!");
     }
     setIsDropdownOpen(false);
   };
@@ -103,7 +98,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         <div>
           <FaShare onClick={toggleDropdown} className="cursor-pointer" />
           {isDropdownOpen && (
-            <div className="absolute top-full left-10 mt-2 w-40 bg-white border rounded shadow-lg z-10">
+            <div className="absolute top-full right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
               <p
                 onClick={() => handleShare("copy")}
                 className="p-2 cursor-pointer hover:bg-gray-200"
@@ -111,10 +106,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 Copy Link
               </p>
               <p
-                onClick={() => handleShare("share")}
+                onClick={() => handleShare("family")}
                 className="p-2 cursor-pointer hover:bg-gray-200"
               >
-                Share via Web
+                Share with Family Members
               </p>
             </div>
           )}
