@@ -13,32 +13,32 @@ import {
 const Dashboard = () => {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
-  useEffect(() => {
-    checkTokenExpiration().catch(console.error);
-    setupTokenExpirationCheck();
-    const fetchData = async () => {
-      try {
-        const token = getAccessToken();
-        if (!token) {
-          logout(); // Redirect to login if no token is available
-          return;
-        }
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setData(response.data);
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-      }
-    };
+  // useEffect(() => {
+  //   checkTokenExpiration().catch(console.error);
+  //   setupTokenExpirationCheck();
+  //   const fetchData = async () => {
+  //     try {
+  //       const token = getAccessToken();
+  //       if (!token) {
+  //         logout(); // Redirect to login if no token is available
+  //         return;
+  //       }
+  //       const response = await axios.get(
+  //         process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected",
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+  //       setData(response.data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch data", error);
+  //     }
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
   return (
     <Layout>
