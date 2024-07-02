@@ -98,7 +98,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         <div>
           <FaShare onClick={toggleDropdown} className="cursor-pointer" />
           {isDropdownOpen && (
-            <div className="absolute top-full right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
+            <div className="absolute top-full left-10 mt-2 w-40 bg-white border rounded shadow-lg z-10">
               <p
                 onClick={() => handleShare("copy")}
                 className="p-2 cursor-pointer hover:bg-gray-200"
