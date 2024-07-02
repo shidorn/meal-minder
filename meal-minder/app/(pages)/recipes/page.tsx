@@ -9,25 +9,6 @@ import Modal from "@/app/components/modal/Modal";
 import { FaPlus } from "react-icons/fa";
 import SearchBar from "@/app/components/search-bar/SearchBar";
 
-<<<<<<< HEAD
-const Recipes = () => {
-  // const router = useRouter();
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     router.push("/login");
-  //   }
-
-  //   axios
-  //     .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //       router.push("/login");
-  //     });
-  // }, [router]);
-=======
 interface Ingredient {
   name: string;
   quantity: number;
@@ -62,23 +43,22 @@ const Recipes: React.FC = () => {
     null
   );
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-    }
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     router.push("/login");
+  //   }
 
-    axios
-      .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(() => setLoading(false))
-      .catch((error) => {
-        console.log(error);
-        router.push("/login");
-      });
-  }, [router]);
->>>>>>> e03db0f5014384dd9dfe5a55571182fdb2a07b2b
+  //   axios
+  //     .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then(() => setLoading(false))
+  //     .catch((error) => {
+  //       console.log(error);
+  //       router.push("/login");
+  //     });
+  // }, [router]);
 
   const availableRecipes = recipes.filter((recipe) => {
     return recipe.ingredients.every((ingredient) => {

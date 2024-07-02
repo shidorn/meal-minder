@@ -68,12 +68,23 @@ const GroceryLists = () => {
             uniqueGroceryLists.add(item.grocery_id);
             item.date_created = dateCreateOnly;
             item.target_date = dateTargetOnly;
+            // item.status = status(item.grocery_id);
+            const resStatus = status(item.grocery_id);
+            resStatus.then((result) => {
+              item.status = result;
+            });
+            // console.log(
+            //   resStatus.then((result) => {
+            //     console.log(result);
+            //   })
+            // );
+            // console.log(groceryLists);
             groceryLists.push(item);
           }
         });
         setGroceryLists((groceryLists) => [...groceryLists]);
 
-        console.log(groceryLists);
+        // console.log(groceryLists);
       } catch (error) {
         console.log(error);
         router.push("/login");
@@ -81,14 +92,23 @@ const GroceryLists = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, [router, groceryLists]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState(groceryListForm);
   const [editItemId, setEditItemId] = useState<number | null>(null);
   // const [groceryLists, setGroceryLists] =
   //   useState<GroceryList[]>(initialGroceryLists);
+
+  const status = async (id: number) => {
+    const response = await axios.get(
+      process.env.NEXT_PUBLIC_API_ENDPOINT +
+        "/groceries/grocery-list-status/" +
+        id
+    );
+    // console.log(response);
+    return response.data[0].f0;
+  };
 
   const openModal = () => {
     setIsModalVisible(true);

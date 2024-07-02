@@ -22,7 +22,7 @@ const initialGroceryItems: GroceryItem[] = [
     quantity: 4,
     category: "Fruit",
     addedBy: "John",
-    isPurchased: false,
+    isPurchased: true,
   },
   {
     id: 2,

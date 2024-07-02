@@ -39,7 +39,7 @@ export const refreshToken = async (): Promise<void> => {
 
 export const checkTokenExpiration = async (): Promise<void> => {
   const token = getAccessToken();
-  console.log(token);
+  // console.log(token);
   if (!token) {
     throw new Error("No access token available");
   }

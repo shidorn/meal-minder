@@ -1,13 +1,4 @@
 "use client";
-<<<<<<< HEAD
-import React from "react";
-import Layout from "@/app/components/Layout";
-import { useGroceryContext } from "@/context/GroceryContext";
-
-const Inventory = () => {
-  const { groceryItems } = useGroceryContext();
-  const purchasedItems = groceryItems.filter((item) => item.isPurchased);
-=======
 import React, { useEffect, useState } from "react";
 import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
@@ -15,6 +6,21 @@ import axios from "axios";
 import { useGroceryContext } from "@/context/GroceryContext";
 import Pagination from "@/app/components/pagination/Pagination";
 import SearchBar from "@/app/components/search-bar/SearchBar";
+import {
+  checkTokenExpiration,
+  getAccessToken,
+  setupTokenExpirationCheck,
+  logout,
+} from "@/app/auth";
+
+interface GroceryItem {
+  item_id: number;
+  item_name: string;
+  item_quantity: number;
+  item_category: string;
+  user: { username: string };
+  is_purchased: boolean;
+}
 
 const Inventory = () => {
   const router = useRouter();
@@ -22,11 +28,14 @@ const Inventory = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [groceryItemsList, setGroceryItemsList] = useState<GroceryItem[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    checkTokenExpiration().catch(console.error);
+    setupTokenExpirationCheck();
+    const token = getAccessToken();
     if (!token) {
-      router.push("/login");
+      logout(); // Redirect to login if no token is available
       return;
     }
 
@@ -37,8 +46,39 @@ const Inventory = () => {
       .then(() => setLoading(false))
       .catch((error) => {
         console.log(error);
-        router.push("/login");
+        // logout(); // Redirect to login if no token is available
+        return;
       });
+
+    console.log(groceryItems);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_API_ENDPOINT +
+            "/groceries/item-list-purchased",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log(response);
+        const respData: GroceryItem[] = response.data;
+        const uniqueGroceryItems = new Set(
+          groceryItemsList.map((item) => item.item_id)
+        );
+        respData.forEach((item) => {
+          if (!uniqueGroceryItems.has(item.item_id)) {
+            groceryItemsList.push(item);
+          }
+        });
+        setGroceryItemsList((groceryItemsList) => [...groceryItemsList]);
+        console.log(groceryItemsList);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+        logout(); // Redirect to login if no token is available
+        return;
+      }
+    };
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   if (loading) {
@@ -52,7 +92,9 @@ const Inventory = () => {
     );
   }
 
-  const purchasedItems = groceryItems.filter((item) => item.isPurchased);
+  // const purchasedItems = groceryItemsList.filter((item) => item.is_purchased);
+  const purchasedItems = groceryItemsList;
+
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -63,7 +105,6 @@ const Inventory = () => {
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
->>>>>>> e03db0f5014384dd9dfe5a55571182fdb2a07b2b
 
   return (
     <Layout>
@@ -88,11 +129,11 @@ const Inventory = () => {
             </thead>
             <tbody>
               {purchasedItems.map((item) => (
-                <tr key={item.id} className="border-t border-dashed">
-                  <td className="py-2 px-4">{item.name}</td>
-                  <td className="py-2 px-4">{item.quantity}</td>
-                  <td className="py-2 px-4">{item.category}</td>
-                  <td className="py-2 px-4">{item.addedBy}</td>
+                <tr key={item.item_id} className="border-t border-dashed">
+                  <td className="py-2 px-4">{item.item_name}</td>
+                  <td className="py-2 px-4">{item.item_quantity}</td>
+                  <td className="py-2 px-4">{item.item_category}</td>
+                  <td className="py-2 px-4">{item.user.username}</td>
                 </tr>
               ))}
             </tbody>

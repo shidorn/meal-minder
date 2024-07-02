@@ -15,14 +15,14 @@ interface User {
 }
 
 interface UserContextType {
-  user: User | null;
+  usert: User | null;
   setUser: (user: User) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [usert, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,7 +34,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ usert, setUser }}>
       {children}
     </UserContext.Provider>
   );
@@ -52,7 +52,6 @@ const getUserDataFromAPI = async (): Promise<User> => {
   const email = {
     userEmail: localStorage.getItem("email"),
   };
-  console.log(email);
   const response = await axios.post(
     process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/getUser",
     email

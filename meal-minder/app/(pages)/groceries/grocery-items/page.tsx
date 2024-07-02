@@ -103,6 +103,7 @@ const GroceryItemsPage = () => {
     }
 
     if (editItemId === null) {
+      console.log("formData :", formData);
       const newItem = {
         ...formData,
         grocery_id: parseInt(listId ?? ""),

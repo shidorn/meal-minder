@@ -7,12 +7,9 @@ import Modal from "@/app/components/modal/Modal";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ClipLoader } from "react-spinners";
-<<<<<<< HEAD
 import Cookies from "js-cookie";
 import { storeTokens } from "@/app/auth";
-=======
 // import Cookies from "js-cookie";
->>>>>>> e03db0f5014384dd9dfe5a55571182fdb2a07b2b
 
 const Login = () => {
   const [formData, setFormData] = useState({
