@@ -1,10 +1,7 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { FaBell } from "react-icons/fa";
 import Image from "next/image";
-import Button from "@/app/components/buttons/button";
-import { ClipLoader } from "react-spinners";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { GoPersonFill, GoSignOut } from "react-icons/go";
@@ -17,11 +14,12 @@ const Header = () => {
     name: "",
     profilePicture: "/images/default-profile.jpg",
   });
+
   useEffect(() => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("/users");
+        const response = await axios.get("/auth/getUser");
         setUser(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -33,24 +31,36 @@ const Header = () => {
     fetchUserData();
   }, []);
 
-  const handleLogoutClick = async (e: any) => {
+  const handleLogoutClick = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
-    // const response = await axios.post(
-    //   process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/logout"
-    // );
-    // console.log(response);
-    // if (response.status == 200) {
-    localStorage.removeItem("token");
-    router.push("/login");
-    // }
+    try {
+      // Call your logout endpoint if needed
+      // const response = await axios.post(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/logout");
+      // console.log(response);
+      // if (response.status === 200) {
+      localStorage.removeItem("token");
+      router.push("/login");
+      // }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
   const handleProfileClick = () => {
     setIsDropDownVisible(!isDropDownVisible);
   };
 
+  const handleProfileClicked = () => {
+    router.push("/profile");
+  };
+
+  if (loading) return <div>Loading...</div>; // Optionally show a loading indicator
+
   return (
-    <header className="w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md">
+    <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-20">
       <div className="flex items-center space-x-4">
         <button className="flex flex-row gap-2 items-center hover:text-red-900">
           <FaBell />
@@ -92,6 +102,7 @@ const Header = () => {
               <a
                 href="#"
                 className="flex items-center gap-4 font-medium px-4 py-2 text-gray-800 hover:bg-gray-100"
+                onClick={handleProfileClicked}
               >
                 <GoPersonFill />
                 Profile

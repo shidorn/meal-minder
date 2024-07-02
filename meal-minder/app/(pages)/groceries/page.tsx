@@ -1,11 +1,12 @@
 "use client";
-import SearchBar from "@/app/components/search-bar/SearchBar";
 import React, { useState, useEffect } from "react";
 import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
 import Breadcrumbs from "@/app/components/BreadCrumbs";
 import Modal from "@/app/components/modal/Modal";
 import axios from "axios";
+import Pagination from "@/app/components/pagination/Pagination";
+import SearchBar from "@/app/components/search-bar/SearchBar"; // Import SearchBar component
 
 interface GroceryList {
   grocery_id: number;
@@ -22,6 +23,8 @@ const groceryListForm = {
 const GroceryLists = () => {
   const router = useRouter();
   const [groceryLists, setGroceryLists] = useState<GroceryList[]>([]);
+  const [filteredLists, setFilteredLists] = useState<GroceryList[]>([]); // State for filtered lists
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -31,28 +34,11 @@ const GroceryLists = () => {
 
     const fetchData = async () => {
       try {
-        const [response1, response2] = await Promise.all([
-          axios.get(
-            process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected",
-            config
-          ),
-          axios.get(
-            process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/grocery-list",
-            config
-          ),
-        ]);
-        const response2Data: GroceryList[] = response2.data;
-        const uniqueGroceryLists = new Set(
-          groceryLists.map((item) => item.grocery_id)
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/grocery-list",
+          config
         );
-        response2Data.forEach((item) => {
-          if (!uniqueGroceryLists.has(item.grocery_id)) {
-            uniqueGroceryLists.add(item.grocery_id);
-            groceryLists.push(item);
-          }
-        });
-        setGroceryLists((groceryLists) => [...groceryLists]);
-        console.log(groceryLists);
+        setGroceryLists(response.data);
       } catch (error) {
         console.log(error);
         router.push("/login");
@@ -65,9 +51,9 @@ const GroceryLists = () => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState(groceryListForm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [editItemId, setEditItemId] = useState<number | null>(null);
-  // const [groceryLists, setGroceryLists] =
-  //   useState<GroceryList[]>(initialGroceryLists);
 
   const openModal = () => {
     setIsModalVisible(true);
@@ -107,12 +93,47 @@ const GroceryLists = () => {
         formData
       );
 
-      console.log(response.data);
-      console.log(formData);
       setGroceryLists([...groceryLists, response.data]);
     }
     setFormData(groceryListForm);
     closeModal();
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  // Logic to handle filtered lists based on search query
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredLists([]);
+    } else {
+      const filtered = groceryLists.filter((list) =>
+        list.grocery_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredLists(filtered);
+    }
+  }, [searchQuery, groceryLists]);
+
+  // Reset filtered lists when search query is cleared
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredLists([]);
+    }
+  }, [searchQuery]);
+
+  // Determine which list to render based on search state
+  const listsToRender =
+    searchQuery.trim() === "" ? groceryLists : filteredLists;
+  const currentItems = listsToRender.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(listsToRender.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
   };
 
   return (
@@ -126,75 +147,64 @@ const GroceryLists = () => {
             />
           </div>
           <div className="mr-72">
-            <SearchBar onSearch={() => {}} />
+            <SearchBar onSearch={handleSearch} />
           </div>
+        </div>
+
+        <div>
+          <button
+            onClick={openModal}
+            className="mt-4 bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded mb-4"
+          >
+            Add New List
+          </button>
         </div>
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
           <thead className="bg-gray-200">
             <tr>
               <th className="py-2 px-4 text-left">Name</th>
-              {/* <th className="py-2 px-4 text-left">Date Created</th> */}
               <th className="py-2 px-4 text-left">Date Needed</th>
               <th className="py-2 px-4 text-left">Status</th>
               <th className="py-2 px-4 text-left">Action</th>
             </tr>
           </thead>
-          {groceryLists.length === 0 ? (
-            <tbody>
-              <tr>
-                <td></td>
-                <td className="py-6">
-                  <div className="flex flex-col gap-6 justify-center items-center space-x-2">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-                    <span className="text-lg font-bold">Loading</span>
-                  </div>
+          <tbody>
+            {currentItems.map((list) => (
+              <tr key={list.grocery_id}>
+                <td className="border-t border-dashed p-6">
+                  {list.grocery_name}
                 </td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tbody>
-          ) : (
-            <tbody>
-              {groceryLists.map((list) => (
-                <tr key={list.grocery_id}>
-                  <td className="border-t border-dashed p-6">
-                    {list.grocery_name}
-                  </td>
-                  {/* <td className="border-t border-dashed py-2 px-4">
-                    {list.date_created}
-                  </td> */}
-                  <td className="border-t border-dashed py-2 px-4">
-                    {list.target_date}
-                  </td>
-                  <td
-                    className={`${
-                      list.status === "Pending"
-                        ? "text-yellow-600"
-                        : "text-green-700"
-                    } border-b border-dashed`}
+                <td className="border-t border-dashed py-2 px-4">
+                  {list.target_date}
+                </td>
+                <td
+                  className={`${
+                    list.status === "Pending"
+                      ? "text-yellow-600"
+                      : "text-green-700"
+                  } border-b border-dashed`}
+                >
+                  {list.status}
+                </td>
+                <td className="border-t border-dashed py-2 px-4">
+                  <a
+                    onClick={() => handleViewList(list.grocery_id)}
+                    className="text-red-900 rounded  hover:font-semibold cursor-pointer"
                   >
-                    {list.status}
-                  </td>
-                  <td className="border-t border-dashed py-2 px-4">
-                    <a
-                      onClick={() => handleViewList(list.grocery_id)}
-                      className="text-red-900 rounded  hover:font-semibold cursor-pointer"
-                    >
-                      View List
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          )}
+                    View List
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
-
-        <button
-          onClick={openModal}
-          className="mt-4 bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded"
-        >
-          Add New List
-        </button>
+        <div className="mt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
 
         <Modal isOpen={isModalVisible} onClose={closeModal}>
           <h2 className="text-2xl font-bold mb-6 text-center text-red-900">
