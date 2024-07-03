@@ -112,7 +112,7 @@ const Inventory = () => {
     <Layout>
       <div className="container mx-auto p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold mb-4">Inventory</h1>
+          <h1 className="text-2xl font-bold mb-4">Inventory</h1>
           <div className="mr-72">
             <SearchBar onSearch={() => {}} />
           </div>

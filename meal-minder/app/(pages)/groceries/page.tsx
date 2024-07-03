@@ -211,7 +211,7 @@ const GroceryLists = () => {
       <div className="container mx-auto p-4">
         <div className="flex flex-row items-baseline w-full justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-4">Grocery Lists</h1>
+            <h1 className="text-2xl font-bold mb-4">Grocery Lists</h1>
             <Breadcrumbs
               crumbs={[{ title: "Grocery Lists", href: "/groceries" }]}
             />

@@ -177,7 +177,7 @@ const Recipes: React.FC = () => {
     <Layout>
       <div className="container mx-auto p-4">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold">Available Recipes</h1>
+          <h1 className="text-2xl font-bold">Available Recipes</h1>
           <div className="flex items-center">
             <div className="mr-72">
               <SearchBar onSearch={handleSearch} />
