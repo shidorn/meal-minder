@@ -2,12 +2,13 @@ import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import { UserProvider } from "@/context/UserProvider";
 import { GroceryProvider } from "@/context/GroceryContext";
+import { AuthProvider } from "@/app/utils/authContext";
+import { UserProvider } from "@/context/UserProvider";
 
-const inter = Poppins({
+const poppins = Poppins({
   subsets: ["latin"],
-  weight: "500",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -18,10 +19,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>
-        <UserProvider>
-          <GroceryProvider>{children}</GroceryProvider>
-        </UserProvider>
+      <body className={poppins.className}>
+        <AuthProvider>
+          <UserProvider>
+            <GroceryProvider>{children}</GroceryProvider>
+          </UserProvider>
+        </AuthProvider>
       </body>
     </html>
   );

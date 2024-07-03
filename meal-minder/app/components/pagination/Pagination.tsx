@@ -1,12 +1,5 @@
 import React from "react";
-import { FaArrowAltCircleLeft, FaArrowLeft } from "react-icons/fa";
-import { FaArrowRight } from "react-icons/fa6";
-import { GoArrowDownLeft, GoArrowLeft } from "react-icons/go";
-import {
-  RiArrowDropLeftFill,
-  RiArrowDropLeftLine,
-  RiArrowDropRightLine,
-} from "react-icons/ri";
+import { RiArrowDropLeftLine, RiArrowDropRightLine } from "react-icons/ri";
 
 interface PaginationProps {
   currentPage: number;

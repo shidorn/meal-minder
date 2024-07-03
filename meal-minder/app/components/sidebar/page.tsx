@@ -23,7 +23,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="bg-red-900 h-screen w-64 text-white flex flex-col items-center p-4 gap-4">
+    <div className="fixed bg-red-900 h-full overflow-hidden w-64 text-white flex flex-col items-center p-4 gap-4">
       <div className="logo mb-10">
         <Image
           src={`/images/logo.png`}
@@ -58,7 +58,7 @@ const Sidebar = () => {
 
       <style jsx>{`
         .active {
-          font-weight: bold;
+          font-weight: lighter;
         }
       `}</style>
     </div>

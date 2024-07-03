@@ -39,12 +39,22 @@ const GroceryItemsPage = () => {
   const searchParams = useSearchParams();
   const user = localStorage.getItem("user_name")?.toString();
   const currentUser = { name: user };
-
   const listId = searchParams.get("id");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredItems, setFilteredItems] = useState<GroceryItem[]>([]);
 
   useEffect(() => {
+    setFilteredItems(
+      groceryItems.filter(
+        (item) =>
+          item.is_purchase &&
+          item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
     checkTokenExpiration().catch(console.error);
     setupTokenExpirationCheck();
+
     const fetchData = async () => {
       try {
         const token = getAccessToken();
@@ -73,8 +83,9 @@ const GroceryItemsPage = () => {
         router.push("/login");
       }
     };
+
     fetchData();
-  }, [router]);
+  }, [router, groceryItems, searchTerm]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
@@ -187,6 +198,11 @@ const GroceryItemsPage = () => {
     setCurrentPage(pageNumber);
   };
 
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    setCurrentPage(1); // Reset to first page on search
+  };
+
   return (
     <Layout>
       <div className="container mx-auto p-4">
@@ -201,7 +217,7 @@ const GroceryItemsPage = () => {
             />
           </div>
           <div className="mr-72">
-            <SearchBar onSearch={() => {}} />
+            <SearchBar onSearch={handleSearch} />
           </div>
         </div>
 
@@ -217,7 +233,7 @@ const GroceryItemsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {groceryItems.map((item) => (
+            {currentItems.map((item) => (
               <tr key={item.item_id} className="border-t border-dashed">
                 <td className="py-2 px-4">
                   <input

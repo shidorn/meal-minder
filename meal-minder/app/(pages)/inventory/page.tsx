@@ -27,8 +27,10 @@ const Inventory = () => {
   const { groceryItems } = useGroceryContext();
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(7);
   const [groceryItemsList, setGroceryItemsList] = useState<GroceryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
 
   useEffect(() => {
     checkTokenExpiration().catch(console.error);
@@ -50,7 +52,7 @@ const Inventory = () => {
         return;
       });
 
-    console.log(groceryItems);
+    // console.log(groceryItems);
     const fetchData = async () => {
       try {
         const response = await axios.get(
