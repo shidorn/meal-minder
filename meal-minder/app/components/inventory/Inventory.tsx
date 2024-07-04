@@ -1,17 +1,15 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useGroceryContext } from "@/context/GroceryContext";
-import Pagination from "@/app/components/pagination/Pagination";
-import SearchBar from "@/app/components/search-bar/SearchBar";
 import {
   checkTokenExpiration,
   getAccessToken,
   setupTokenExpirationCheck,
   logout,
 } from "@/app/auth";
+import Pagination from "../pagination/Pagination";
 
 interface GroceryItem {
   item_id: number;
@@ -22,14 +20,13 @@ interface GroceryItem {
   is_purchased: boolean;
 }
 
-const Inventory = () => {
+const Inventory: React.FC = () => {
   const router = useRouter();
   const { groceryItems } = useGroceryContext();
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(7);
+  const [itemsPerPage] = useState(3);
   const [groceryItemsList, setGroceryItemsList] = useState<GroceryItem[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     checkTokenExpiration().catch(console.error);
@@ -58,6 +55,7 @@ const Inventory = () => {
             "/groceries/item-list-purchased",
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log(response);
         const respData: GroceryItem[] = response.data;
         const uniqueGroceryItems = new Set(
           groceryItemsList.map((item) => item.item_id)
@@ -68,6 +66,7 @@ const Inventory = () => {
           }
         });
         setGroceryItemsList((groceryItemsList) => [...groceryItemsList]);
+        console.log(groceryItemsList);
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -78,14 +77,6 @@ const Inventory = () => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
-
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-  };
-
-  const filteredItems = groceryItemsList.filter((item) =>
-    item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   if (loading) {
     return (
@@ -104,70 +95,65 @@ const Inventory = () => {
     return "High";
   };
 
+  const purchasedItems = groceryItemsList;
+
+  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = purchasedItems.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const totalPages = Math.ceil(purchasedItems.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto p-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold mb-4">Inventory</h1>
-          <div>
-            <SearchBar onSearch={handleSearch} />
-          </div>
-        </div>
-        {filteredItems.length === 0 ? (
-          <p>No items purchased yet.</p>
-        ) : (
-          <table className="min-w-full mt-10 bg-white shadow-md rounded-lg overflow-hidden mb-4">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="py-2 px-4 text-left">Name</th>
-                <th className="py-2 px-4 text-left">Quantity</th>
-                <th className="py-2 px-4 text-left">Category</th>
-                <th className="py-2 px-4 text-left">Added By</th>
-                <th className="py-2 px-4 text-left">Stock Level</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map((item) => (
-                <tr key={item.item_id} className="border-t border-dashed">
-                  <td className="py-2 px-4">{item.item_name}</td>
-                  <td className="py-2 px-4">{item.item_quantity}</td>
-                  <td className="py-2 px-4">{item.item_category}</td>
-                  <td className="py-2 px-4">{item.user.username}</td>
-                  <td className="py-2 px-4">
-                    <div
-                      className={`py-2 px-4 text-white w-28 rounded-full text-center ${
-                        getStockLevel(item.item_quantity) === "Low"
-                          ? "bg-red-600"
-                          : getStockLevel(item.item_quantity) === "Average"
-                          ? "bg-yellow-600"
-                          : "bg-green-700"
-                      }`}
-                    >
-                      {getStockLevel(item.item_quantity)}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+    <div className="container flex flex-col mx-auto p-4">
+      <div className="mb-4 self-end">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
       </div>
-    </Layout>
+      {purchasedItems.length === 0 ? (
+        <p>No items purchased yet.</p>
+      ) : (
+        <table className="min-w-full overflow-hidden mb-4">
+          <thead className="">
+            <tr>
+              <th className="py-2 px-4 text-left">Name</th>
+              <th className="py-2 px-4 text-left">Quantity</th>
+              <th className="py-2 px-4 text-left">Category</th>
+              <th className="py-2 px-4 text-left">Stock Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems.map((item) => (
+              <tr key={item.item_id} className="border-t border-dashed">
+                <td className="py-2 px-4">{item.item_name}</td>
+                <td className="py-2 px-4">{item.item_quantity}</td>
+                <td className="py-2 px-4">{item.item_category}</td>
+                <td className="py-3">
+                  <div
+                    className={`py-2 px-4 text-white w-28 rounded-full text-center ${
+                      getStockLevel(item.item_quantity) === "Low"
+                        ? "bg-red-600"
+                        : getStockLevel(item.item_quantity) === "Average"
+                        ? "bg-yellow-600"
+                        : "bg-green-700"
+                    }`}
+                  >
+                    {getStockLevel(item.item_quantity)}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 };
 

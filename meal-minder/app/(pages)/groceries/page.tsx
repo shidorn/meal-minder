@@ -216,7 +216,7 @@ const GroceryLists = () => {
               crumbs={[{ title: "Grocery Lists", href: "/groceries" }]}
             />
           </div>
-          <div className="mr-72">
+          <div>
             <SearchBar onSearch={handleSearch} />
           </div>
         </div>

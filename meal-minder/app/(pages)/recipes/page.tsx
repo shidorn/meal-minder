@@ -178,10 +178,15 @@ const Recipes: React.FC = () => {
       <div className="container mx-auto p-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Available Recipes</h1>
-          <div className="flex items-center">
-            <div className="mr-72">
+          <div className="flex items-center gap-4">
+            <div>
               <SearchBar onSearch={handleSearch} />
             </div>
+          </div>
+        </div>
+        <hr className="mb-4" />
+        <div className="flex flex-col">
+          <div className="self-end">
             <button
               className="bg-red-900 hover:bg-red-800 text-white py-2 px-4 text-sm rounded"
               onClick={handleAddRecipe}
@@ -189,28 +194,26 @@ const Recipes: React.FC = () => {
               Add Recipe
             </button>
           </div>
+          {filteredRecipes.length === 0 ? (
+            <p>No recipes can be made with the current inventory.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRecipes.map((recipe) => (
+                <RecipeCard
+                  key={recipe.id}
+                  id={recipe.id}
+                  name={recipe.name}
+                  ingredients={recipe.ingredients}
+                  image={recipe.image}
+                  cookingTime={recipe.cookingTime}
+                  deleteRecipe={() => handleDeleteRecipe(recipe)}
+                  toggleFavorite={() => toggleFavorite(recipe.id)}
+                  isFavorite={isRecipeFavorite(recipe.id)}
+                />
+              ))}
+            </div>
+          )}
         </div>
-        <hr className="mb-4" />
-
-        {filteredRecipes.length === 0 ? (
-          <p>No recipes can be made with the current inventory.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredRecipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                id={recipe.id}
-                name={recipe.name}
-                ingredients={recipe.ingredients}
-                image={recipe.image}
-                cookingTime={recipe.cookingTime}
-                deleteRecipe={() => handleDeleteRecipe(recipe)}
-                toggleFavorite={() => toggleFavorite(recipe.id)}
-                isFavorite={isRecipeFavorite(recipe.id)}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>

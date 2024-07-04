@@ -1,13 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
 import Image from "next/image";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserProvider";
-import { RiArrowDropDownLine } from "react-icons/ri";
-import { FaPerson } from "react-icons/fa6";
-import { FaSignOutAlt, FaUser } from "react-icons/fa";
 import { logout } from "@/app/auth";
 import { GoPersonFill, GoSignOut } from "react-icons/go";
 
@@ -60,7 +57,7 @@ const Header: React.FC = () => {
   //   fetchUserData();
   // }, []);
 
-  const handleProfileClick = () => {
+  const handleProfileSectionClick = () => {
     setIsDropDownVisible(!isDropDownVisible);
   };
 
@@ -68,7 +65,7 @@ const Header: React.FC = () => {
     router.push("/profile");
   };
 
-  if (loading) return <div>Loading...</div>; // Optionally show a loading indicator
+  if (loading) return <div>Loading...</div>;
 
   return (
     <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-20">
@@ -83,7 +80,7 @@ const Header: React.FC = () => {
           <div className="relative">
             <div
               className="flex items-center space-x-2 cursor-pointer"
-              onClick={handleProfileClick}
+              onClick={handleProfileSectionClick}
             >
               <Image
                 src={user.profileImage}
@@ -92,7 +89,7 @@ const Header: React.FC = () => {
                 height={32}
                 className="rounded-full w-fit"
               />
-              <span className="hidden md:block">{user.name}</span>
+              <span className="hidden md:block">{user.username}</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className={`h-4 w-4 ml-1 ${
