@@ -28,7 +28,7 @@ const Pagination: React.FC<PaginationProps> = ({
             className=" flex items-center text-sm py-2 px-3 leading-tight text-red-900 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
             <RiArrowDropLeftLine width={12} height={12} />
-            <p>Prev</p>
+            <p></p>
           </button>
         </li>
         {pageNumbers.map((number) => (
@@ -51,7 +51,7 @@ const Pagination: React.FC<PaginationProps> = ({
             disabled={currentPage === totalPages}
             className="flex items-center text-sm py-2 px-3 leading-tight text-red-900 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
-            <p>Next</p>
+            <p></p>
             <RiArrowDropRightLine width={12} height={12} />
           </button>
         </li>

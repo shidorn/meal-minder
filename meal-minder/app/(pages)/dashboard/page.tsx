@@ -1,17 +1,13 @@
 "use client";
 import Layout from "@/app/components/Layout";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import {
-  checkTokenExpiration,
-  getAccessToken,
-  setupTokenExpirationCheck,
-  logout,
-} from "@/app/auth";
-import { Fa42Group, FaTeamspeak } from "react-icons/fa6";
-import { FaHeart, FaStar, FaUserFriends } from "react-icons/fa";
+import { FaStar, FaUserFriends, FaHeart } from "react-icons/fa";
 import { MdOutlineInventory } from "react-icons/md";
+import { Recipe, FamilyMember } from "@/app/types/type";
+import Image from "next/image";
+import Inventory from "@/app/components/inventory/Inventory";
+import { Fa42Group, FaTeamspeak } from "react-icons/fa6";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -43,38 +39,47 @@ const Dashboard = () => {
   //   fetchData();
   // }, []);
 
+  const favoriteRecipes: Recipe[] = [
+    { id: 1, name: "Spaghetti Carbonara", image: "/images/spaghetti.jpg" },
+    { id: 2, name: "Chocolate Chip Cookies", image: "/images/cookies.jpg" },
+    { id: 3, name: "Grilled Salmon", image: "/images/salmon.jpg" },
+  ];
+
+  const members: FamilyMember[] = [
+    {
+      id: 1,
+      first_name: "John",
+      last_name: "Dela Cruz",
+      email: "johndelacruz@example.com",
+      image: "/images/default-profile.jpg",
+    },
+    {
+      id: 2,
+      first_name: "Jane",
+      last_name: "Dela Cruz",
+      email: "janedelacruz@example.com",
+      image: "/images/default-profile.jpg",
+    },
+    {
+      id: 3,
+      first_name: "Janine",
+      last_name: "Dela Cruz",
+      email: "janinedelacruz@example.com",
+      image: "/images/default-profile.jpg",
+    },
+    {
+      id: 4,
+      first_name: "Janella",
+      last_name: "Dela Cruz",
+      email: "janelladelacruz@example.com",
+      image: "/images/default-profile.jpg",
+    },
+  ];
+
   return (
     <Layout>
-      <div className="container  w-full h-full p-2">
-        <div className="grid grid-cols-2 gap-6 items-center p-2 w-full h-2/4">
-          <div className="flex gap-4 bg-white p-4 h-full rounded-lg shadow-lg">
-            <div className="bg-red-300 w-10 h-10 px-2 py-3 rounded-full">
-              <FaUserFriends className="w-6 text-red-800" />
-            </div>
-            <div>
-              <h1 className="font-bold">Members</h1>
-              <p className="text-sm text-gray-400">no. of participants</p>
-            </div>
-          </div>
-          <div className="flex gap-4 bg-white p-4 h-full rounded-lg shadow-lg">
-            <div className="bg-red-300 w-10 h-10 px-2 py-3 rounded-full">
-              <FaStar className="w-6 text-red-800" />
-            </div>
-            <div className="pt-3 font-bold">
-              <h1>Favorite Recipes</h1>
-            </div>
-          </div>
-        </div>
-        <div className=" h-2/4 p-2">
-          <div className="flex gap-4 bg-white p-4 h-full rounded-lg shadow-lg">
-            <div className="bg-red-300 w-10 h-10 px-2 py-3 rounded-full">
-              <MdOutlineInventory className="w-6 text-red-800" />
-            </div>
-            <div className="pt-3">
-              <h1 className="font-bold">Inventory</h1>
-            </div>
-          </div>
-        </div>
+      <div>
+        <h1>Welcome to Protected Dashboard</h1>
       </div>
     </Layout>
   );

@@ -10,7 +10,9 @@ import React, {
 
 interface User {
   user_id: string;
-  name: string;
+  username: string;
+  first_name: string;
+  last_name: string;
   profileImage: string;
 }
 
@@ -60,9 +62,12 @@ const getUserDataFromAPI = async (): Promise<User> => {
   );
   console.log(response.data.username);
   localStorage.setItem("user_name", response.data.username);
+  localStorage.setItem("first_name", response.data.first_name);
   return {
     user_id: response.data.user_id,
-    name: response.data.username,
-    profileImage: "/images/unnamed.jpg",
+    username: response.data.username,
+    first_name: response.data.first_name,
+    last_name: response.data.last_name,
+    profileImage: "/images/default-profile.jpg",
   };
 };

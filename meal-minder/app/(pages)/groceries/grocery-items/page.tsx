@@ -44,17 +44,8 @@ const GroceryItemsPage = () => {
   const [filteredItems, setFilteredItems] = useState<GroceryItem[]>([]);
 
   useEffect(() => {
-    setFilteredItems(
-      groceryItems.filter(
-        (item) =>
-          item.is_purchase &&
-          item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-
     checkTokenExpiration().catch(console.error);
     setupTokenExpirationCheck();
-
     const fetchData = async () => {
       try {
         const token = getAccessToken();
@@ -74,18 +65,14 @@ const GroceryItemsPage = () => {
         );
 
         const responseData: GroceryItem[] = response.data;
-        responseData.forEach((item) => {
-          groceryItems.push(item);
-        });
-        setGroceryItems((groceryItems) => [...groceryItems]);
+        setGroceryItems(responseData);
       } catch (error) {
         console.log(error);
         router.push("/login");
       }
     };
-
     fetchData();
-  }, [router, searchTerm]);
+  }, [router]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
@@ -94,7 +81,6 @@ const GroceryItemsPage = () => {
       item_name: "",
       item_quantity: 1,
       item_category: "",
-      // user_id: "",
     });
     setEditItemId(null);
   };
@@ -113,6 +99,12 @@ const GroceryItemsPage = () => {
       return;
     }
 
+    const token = getAccessToken();
+    if (!token) {
+      logout();
+      return;
+    }
+
     if (editItemId === null) {
       console.log("formData :", formData);
       const newItem = {
@@ -122,7 +114,12 @@ const GroceryItemsPage = () => {
       };
       const response = await axios.post(
         process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/add-item",
-        newItem
+        newItem,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       console.log(response.data);
       setGroceryItems([...groceryItems, response.data]);
@@ -138,7 +135,12 @@ const GroceryItemsPage = () => {
         process.env.NEXT_PUBLIC_API_ENDPOINT +
           "/groceries/update-item/" +
           editItemId,
-        updateFormData
+        updateFormData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       console.log(response.data);
       const updatedItems = groceryItems.map((item) =>
@@ -162,21 +164,41 @@ const GroceryItemsPage = () => {
 
   const handleDeleteItem = async (id: number) => {
     console.log(id);
+    const token = getAccessToken();
+    if (!token) {
+      logout();
+      return;
+    }
     const item_id = { id: id };
     const response = await axios.post(
       process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/delete-item",
-      item_id
+      item_id,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
     console.log(response.data);
     setGroceryItems(groceryItems.filter((item) => item.item_id !== id));
   };
 
   const handleCheckboxChange = async (id: number, status: boolean) => {
+    const token = getAccessToken();
+    if (!token) {
+      logout();
+      return;
+    }
     const response = await axios.post(
       process.env.NEXT_PUBLIC_API_ENDPOINT +
         "/groceries/update-item-status/" +
         id,
-      { is_purchase: !status }
+      { is_purchase: !status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
     console.log(response);
     setGroceryItems(
@@ -188,12 +210,13 @@ const GroceryItemsPage = () => {
 
   const isFormValid = () =>
     formData.item_name && formData.item_quantity > 0 && formData.item_category;
+
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = groceryItems.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(groceryItems.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -209,7 +232,7 @@ const GroceryItemsPage = () => {
       <div className="container mx-auto p-4">
         <div className="flex justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-4">Grocery Items</h1>
+            <h1 className="text-2xl font-bold mb-4">Grocery Items</h1>
             <Breadcrumbs
               crumbs={[
                 { title: "Grocery Lists", href: "/groceries" },
@@ -218,7 +241,7 @@ const GroceryItemsPage = () => {
             />
           </div>
           <div className="mr-72">
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar onSearch={() => {}} />
           </div>
         </div>
 

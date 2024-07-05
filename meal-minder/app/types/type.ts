@@ -8,7 +8,15 @@ export interface GroceryItem {
 }
 
 export interface Recipe {
-  id: string;
+  id: number;
   name: string;
-  ingredients: { name: string; quantity: number }[];
+  image: string;
+}
+
+export interface FamilyMember {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  image: string;
 }

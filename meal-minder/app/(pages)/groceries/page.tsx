@@ -211,13 +211,13 @@ const GroceryLists = () => {
       <div className="container mx-auto p-4">
         <div className="flex flex-row items-baseline w-full justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-4">Grocery Lists</h1>
+            <h1 className="text-2xl font-bold mb-4">Grocery Lists</h1>
             <Breadcrumbs
               crumbs={[{ title: "Grocery Lists", href: "/groceries" }]}
             />
           </div>
           <div className="mr-72">
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar onSearch={() => {}} />
           </div>
         </div>
 
@@ -238,35 +238,54 @@ const GroceryLists = () => {
               <th className="py-2 px-4 text-left">Action</th>
             </tr>
           </thead>
-          <tbody>
-            {currentItems.map((list) => (
-              <tr key={list.grocery_id}>
-                <td className="border-t border-dashed p-6">
-                  {list.grocery_name}
+          {groceryLists.length === 0 ? (
+            <tbody>
+              <tr>
+                <td></td>
+                <td className="py-6">
+                  <div className="flex flex-col gap-6 justify-center items-center space-x-2">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+                    <span className="text-lg font-bold">Loading</span>
+                  </div>
                 </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  {list.target_date}
-                </td>
-                <td
-                  className={`${
-                    list.status === "Pending"
-                      ? "text-yellow-600"
-                      : "text-green-700"
-                  } border-b border-dashed`}
-                >
-                  {list.status}
-                </td>
-                <td className="border-t border-dashed py-2 px-4">
-                  <a
-                    onClick={() => handleViewList(list.grocery_id)}
-                    className="text-red-900 rounded  hover:font-semibold cursor-pointer"
-                  >
-                    View List
-                  </a>
-                </td>
+                <td></td>
+                <td></td>
               </tr>
-            ))}
-          </tbody>
+            </tbody>
+          ) : (
+            <tbody>
+              {groceryLists.map((list) => (
+                <tr key={list.grocery_id}>
+                  <td className="border-t border-dashed p-6">
+                    {list.grocery_name}
+                  </td>
+                  {/* <td className="border-t border-dashed py-2 px-4">
+                    {list.date_created}
+                  </td> */}
+                  <td className="border-t border-dashed py-2 px-4">
+                    {list.target_date}
+                  </td>
+                  <td
+                    className={`${
+                      list.status === "Pending"
+                        ? "text-yellow-600"
+                        : "text-green-700"
+                    } border-b border-dashed`}
+                  >
+                    {list.status}
+                  </td>
+                  <td className="border-t border-dashed py-2 px-4">
+                    <a
+                      onClick={() => handleViewList(list.grocery_id)}
+                      className="text-red-900 rounded  hover:font-semibold cursor-pointer"
+                    >
+                      View List
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
         <div className="mt-4">
           <Pagination
