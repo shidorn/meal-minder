@@ -1,8 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaBell } from "react-icons/fa";
 import Image from "next/image";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserProvider";
 import { logout } from "@/app/auth";
@@ -19,43 +18,13 @@ const Header: React.FC = () => {
   };
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  localStorage.setItem("user_id", user?.user_id ?? "");
   const [isDropDownVisible, setIsDropDownVisible] = useState(false);
-  // const [user, setUser] = useState({
-  //   name: "",
-  //   profilePicture: "/images/default-profile.jpg",
-  // });
 
-  // useEffect(() => {
-  //   const fetchUserData = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await axios.get("/auth/getUser");
-  //       setUser(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching user data:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  // useEffect(() => {
-  //   const fetchUserData = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await axios.get(
-  //         process.env.NEXT_PUBLIC_API_ENDPOINT + "auth/users"
-  //       );
-  //       setUser(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching user data:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchUserData();
-  // }, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user_id", user?.user_id ?? "");
+    }
+  }, [user]);
 
   const handleProfileSectionClick = () => {
     setIsDropDownVisible(!isDropDownVisible);

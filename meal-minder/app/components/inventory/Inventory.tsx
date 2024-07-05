@@ -90,8 +90,8 @@ const Inventory: React.FC = () => {
   }
 
   const getStockLevel = (quantity: number): string => {
-    if (quantity < 10) return "Low";
-    if (quantity < 50) return "Average";
+    if (quantity < 2) return "Low";
+    if (quantity < 5) return "Average";
     return "High";
   };
 

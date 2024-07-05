@@ -249,7 +249,7 @@ const GroceryLists = () => {
                 </td>
                 <td
                   className={`${
-                    list.status === "PENDING"
+                    list.status === "IN PROGRESS"
                       ? "text-yellow-600"
                       : list.status === "DONE"
                       ? "text-green-700"

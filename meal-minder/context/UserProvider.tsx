@@ -11,6 +11,7 @@ import React, {
 interface User {
   user_id: string;
   username: string;
+  email: string;
   first_name: string;
   last_name: string;
   profileImage: string;
@@ -66,6 +67,7 @@ const getUserDataFromAPI = async (): Promise<User> => {
   return {
     user_id: response.data.user_id,
     username: response.data.username,
+    email: response.data.email,
     first_name: response.data.first_name,
     last_name: response.data.last_name,
     profileImage: "/images/default-profile.jpg",

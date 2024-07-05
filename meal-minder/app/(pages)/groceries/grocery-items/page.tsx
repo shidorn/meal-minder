@@ -44,6 +44,9 @@ const GroceryItemsPage = () => {
   const [filteredItems, setFilteredItems] = useState<GroceryItem[]>([]);
 
   useEffect(() => {
+    checkTokenExpiration().catch(console.error);
+    setupTokenExpirationCheck();
+
     const fetchData = async () => {
       try {
         const token = getAccessToken();
@@ -52,9 +55,7 @@ const GroceryItemsPage = () => {
           return;
         }
         const response = await axios.get(
-          process.env.NEXT_PUBLIC_API_ENDPOINT +
-            "/groceries/item-list/" +
-            listId,
+          `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/item-list/${listId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -64,6 +65,7 @@ const GroceryItemsPage = () => {
 
         const responseData: GroceryItem[] = response.data;
         setGroceryItems(responseData);
+        setFilteredItems(responseData); // Initialize filtered items with all items
       } catch (error) {
         console.log(error);
         router.push("/login");
@@ -72,16 +74,6 @@ const GroceryItemsPage = () => {
 
     fetchData();
   }, [router, listId]);
-
-  useEffect(() => {
-    setFilteredItems(
-      groceryItems.filter(
-        (item) =>
-          item.is_purchase &&
-          item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-  }, [searchTerm, groceryItems]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
@@ -108,30 +100,18 @@ const GroceryItemsPage = () => {
       return;
     }
 
-    const token = getAccessToken();
-    if (!token) {
-      logout();
-      return;
-    }
-
     if (editItemId === null) {
-      console.log("formData :", formData);
       const newItem = {
         ...formData,
         grocery_id: parseInt(listId ?? ""),
         user_id: parseInt(localStorage.getItem("user_id") ?? ""),
       };
       const response = await axios.post(
-        process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/add-item",
-        newItem,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/add-item`,
+        newItem
       );
-      console.log(response.data);
       setGroceryItems([...groceryItems, response.data]);
+      setFilteredItems([...groceryItems, response.data]); // Update filtered items
     } else {
       const updateFormData = {
         item_name: formData.item_name,
@@ -141,21 +121,14 @@ const GroceryItemsPage = () => {
         user_id: parseInt(localStorage.getItem("user_id") ?? ""),
       };
       const response = await axios.post(
-        process.env.NEXT_PUBLIC_API_ENDPOINT +
-          "/groceries/update-item/" +
-          editItemId,
-        updateFormData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/update-item/${editItemId}`,
+        updateFormData
       );
-      console.log(response.data);
       const updatedItems = groceryItems.map((item) =>
         item.item_id === editItemId ? { ...item, ...updateFormData } : item
       );
       setGroceryItems(updatedItems);
+      setFilteredItems(updatedItems); // Update filtered items
     }
 
     closeModal();
@@ -163,7 +136,6 @@ const GroceryItemsPage = () => {
 
   const handleEditItem = (id: number) => {
     const selectedItem = groceryItems.find((item) => item.item_id === id);
-    console.log(selectedItem);
     if (selectedItem) {
       setFormData(selectedItem);
       setEditItemId(id);
@@ -172,48 +144,29 @@ const GroceryItemsPage = () => {
   };
 
   const handleDeleteItem = async (id: number) => {
-    console.log(id);
-    const token = getAccessToken();
-    if (!token) {
-      logout();
-      return;
-    }
-    const item_id = { id: id };
     const response = await axios.post(
-      process.env.NEXT_PUBLIC_API_ENDPOINT + "/groceries/delete-item",
-      item_id,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/delete-item`,
+      { id }
     );
-    console.log(response.data);
     setGroceryItems(groceryItems.filter((item) => item.item_id !== id));
+    setFilteredItems(filteredItems.filter((item) => item.item_id !== id)); // Update filtered items
   };
 
   const handleCheckboxChange = async (id: number, status: boolean) => {
-    const token = getAccessToken();
-    if (!token) {
-      logout();
-      return;
-    }
     const response = await axios.post(
-      process.env.NEXT_PUBLIC_API_ENDPOINT +
-        "/groceries/update-item-status/" +
-        id,
-      { is_purchase: !status },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/update-item-status/${id}`,
+      { is_purchase: !status }
     );
     setGroceryItems(
       groceryItems.map((item) =>
         item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
       )
     );
+    setFilteredItems(
+      filteredItems.map((item) =>
+        item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
+      )
+    ); // Update filtered items
   };
 
   const isFormValid = () =>
@@ -233,6 +186,12 @@ const GroceryItemsPage = () => {
   const handleSearch = (term: string) => {
     setSearchTerm(term);
     setCurrentPage(1); // Reset to first page on search
+    const filtered = groceryItems.filter(
+      (item) =>
+        item.is_purchase &&
+        item.item_name.toLowerCase().includes(term.toLowerCase())
+    );
+    setFilteredItems(filtered);
   };
 
   return (
@@ -240,7 +199,7 @@ const GroceryItemsPage = () => {
       <div className="container mx-auto p-4">
         <div className="flex justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold mb-4">Grocery Items</h1>
+            <h1 className="text-3xl font-bold mb-4">Grocery Items</h1>
             <Breadcrumbs
               crumbs={[
                 { title: "Grocery Lists", href: "/groceries" },
@@ -248,7 +207,7 @@ const GroceryItemsPage = () => {
               ]}
             />
           </div>
-          <div>
+          <div className="mr-72">
             <SearchBar onSearch={handleSearch} />
           </div>
         </div>

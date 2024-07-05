@@ -12,6 +12,7 @@ import {
   setupTokenExpirationCheck,
   logout,
 } from "@/app/auth";
+import { string } from "zod";
 
 interface GroceryItem {
   item_id: number;
@@ -99,8 +100,8 @@ const Inventory = () => {
   }
 
   const getStockLevel = (quantity: number): string => {
-    if (quantity < 10) return "Low";
-    if (quantity < 50) return "Average";
+    if (quantity < 2) return "Low";
+    if (quantity < 5) return "Average";
     return "High";
   };
 

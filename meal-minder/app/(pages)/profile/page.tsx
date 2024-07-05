@@ -86,7 +86,9 @@ const ProfilePage: React.FC = () => {
       const token = localStorage.getItem("access_token");
       const formDataWithImage = new FormData();
       formDataWithImage.append("username", formData.username);
-      formDataWithImage.append("image", formData.imageFile as File);
+      if (formData.imageFile) {
+        formDataWithImage.append("image", formData.imageFile); // Append image only if it exists
+      }
 
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/update-profile`,
@@ -162,7 +164,13 @@ const ProfilePage: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    <span className="text-xl font-medium">{user.username}</span>
+                    <p className="flex flex-col text-center text-xl font-medium">
+                      {user.username}{" "}
+                      <span className="text-sm text-gray-500">
+                        {user.email}
+                      </span>
+                    </p>
+
                     <button
                       type="button"
                       className="bg-yellow-600 p-2 rounded-lg text-sm text-white hover:bg-yellow-500"
