@@ -85,7 +85,7 @@ const GroceryItemsPage = () => {
     };
 
     fetchData();
-  }, [router, groceryItems, searchTerm]);
+  }, [router, searchTerm]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
@@ -178,6 +178,7 @@ const GroceryItemsPage = () => {
         id,
       { is_purchase: !status }
     );
+    console.log(response);
     setGroceryItems(
       groceryItems.map((item) =>
         item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
