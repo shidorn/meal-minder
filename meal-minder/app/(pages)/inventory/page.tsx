@@ -124,6 +124,7 @@ const Inventory = () => {
             <SearchBar onSearch={handleSearch} />
           </div>
         </div>
+
         {filteredItems.length === 0 ? (
           <p>No items purchased yet.</p>
         ) : (
@@ -162,11 +163,14 @@ const Inventory = () => {
             </tbody>
           </table>
         )}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+
+        <div className="absolute bottom-10 left-1/2">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
       </div>
     </Layout>
   );

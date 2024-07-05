@@ -261,11 +261,13 @@ const GroceryItemsPage = () => {
           </tbody>
         </table>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <div className="absolute bottom-10 left-1/2">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
         <button
           onClick={openModal}
           className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded mb-4"

@@ -9,16 +9,25 @@ import { GoPersonFill, GoSignOut } from "react-icons/go";
 
 const Header: React.FC = () => {
   const { user } = useUser();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-  const closeDropdown = () => {
-    setDropdownOpen(false);
-  };
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [isDropDownVisible, setIsDropDownVisible] = useState(false);
+  const [ProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [notifDropdown, setNotifDropdown] = useState(false);
+
+  const handleProfileSectionClick = () => {
+    setProfileDropdownOpen(!ProfileDropdownOpen);
+  };
+
+  const handleNotifClicked = () => {
+    setNotifDropdown(!notifDropdown);
+  };
+
+  const closeNotifDropdown = () => {
+    setNotifDropdown(false);
+  };
+
+  const handleProfileClicked = () => {
+    router.push("/profile");
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -26,25 +35,25 @@ const Header: React.FC = () => {
     }
   }, [user]);
 
-  const handleProfileSectionClick = () => {
-    setIsDropDownVisible(!isDropDownVisible);
-  };
-
-  const handleProfileClicked = () => {
-    router.push("/profile");
-  };
-
-  if (loading) return <div>Loading...</div>;
-
   return (
     <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-20">
       <div className="flex items-center gap-4">
-        <div className="flex items-center space-x-4">
-          <button className="flex flex-row gap-2 items-center hover:text-red-900 ">
-            <FaBell />
-            <p>Notifications</p>
-          </button>
-        </div>
+        {user && (
+          <div className="relative">
+            <button
+              className="flex flex-row gap-2 items-center hover:text-red-900"
+              onClick={handleNotifClicked}
+            >
+              <FaBell />
+              <p>Notifications</p>
+            </button>
+            {notifDropdown && (
+              <div className="absolute right-0 mt-2 w-96 h-96 border bg-white rounded-lg shadow-lg px-4 py-2 text-sm">
+                <p className="italic text-gray-500">Nothing for now.</p>
+              </div>
+            )}
+          </div>
+        )}
         {user && (
           <div className="relative">
             <div
@@ -56,13 +65,13 @@ const Header: React.FC = () => {
                 alt="User Profile"
                 width={32}
                 height={32}
-                className="rounded-full w-fit"
+                className="rounded-full"
               />
               <span className="hidden md:block">{user.username}</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className={`h-4 w-4 ml-1 ${
-                  isDropDownVisible ? "rotate-180" : ""
+                  ProfileDropdownOpen ? "rotate-180" : ""
                 } text-gray-400 transition-transform duration-300`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -74,9 +83,9 @@ const Header: React.FC = () => {
                 />
               </svg>
             </div>
-            {/* Dropdown content */}
-            {isDropDownVisible && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1">
+            {/* Profile dropdown */}
+            {ProfileDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-1">
                 <a
                   href="#"
                   className="flex items-center gap-4 font-medium px-4 py-2 text-gray-800 hover:bg-gray-100"

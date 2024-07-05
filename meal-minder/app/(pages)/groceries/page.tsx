@@ -270,7 +270,7 @@ const GroceryLists = () => {
             ))}
           </tbody>
         </table>
-        <div className="mt-4">
+        <div className="absolute bottom-10 left-1/2">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
