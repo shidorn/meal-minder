@@ -12,7 +12,6 @@ import {
   setupTokenExpirationCheck,
   logout,
 } from "@/app/auth";
-import { string } from "zod";
 
 interface GroceryItem {
   item_id: number;
@@ -28,7 +27,7 @@ const Inventory = () => {
   const { groceryItems } = useGroceryContext();
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(7);
+  const [itemsPerPage] = useState(10);
   const [groceryItemsList, setGroceryItemsList] = useState<GroceryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -85,9 +84,42 @@ const Inventory = () => {
     setSearchTerm(term);
   };
 
-  const filteredItems = groceryItemsList.filter((item) =>
+  const getStockLevel = (quantity: number): string => {
+    if (quantity < 2) return "Low";
+    if (quantity < 5) return "Average";
+    return "High";
+  };
+
+  // Function to aggregate quantities of items with the same name
+  const aggregateQuantities = (items: GroceryItem[]) => {
+    const aggregatedItems: { [key: string]: GroceryItem } = {};
+
+    items.forEach((item) => {
+      if (aggregatedItems[item.item_name]) {
+        aggregatedItems[item.item_name].item_quantity += item.item_quantity;
+      } else {
+        aggregatedItems[item.item_name] = { ...item };
+      }
+    });
+
+    return Object.values(aggregatedItems);
+  };
+
+  const aggregatedItems = aggregateQuantities(groceryItemsList);
+
+  const filteredItems = aggregatedItems.filter((item) =>
     item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   if (loading) {
     return (
@@ -99,22 +131,6 @@ const Inventory = () => {
       </div>
     );
   }
-
-  const getStockLevel = (quantity: number): string => {
-    if (quantity < 2) return "Low";
-    if (quantity < 5) return "Average";
-    return "High";
-  };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
 
   return (
     <Layout>

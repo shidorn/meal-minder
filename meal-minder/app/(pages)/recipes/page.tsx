@@ -34,6 +34,7 @@ interface RecipeProps {
 const Recipes: React.FC = () => {
   const router = useRouter();
   const { groceryItems } = useGroceryContext();
+  const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [recipes, setRecipes] = useState<RecipeProps[]>([]);
   const [favoriteRecipes, setFavoriteRecipes] = useState<string[]>([]);
