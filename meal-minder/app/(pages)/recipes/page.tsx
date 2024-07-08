@@ -15,9 +15,10 @@ import {
   setupTokenExpirationCheck,
 } from "@/app/auth";
 import { removeProperty } from "@/app/utils/removeProperty";
+
 interface Ingredient {
-  name: string;
-  quantity: number;
+  ingredient_name: string;
+  ingredient_quantity: number;
 }
 
 interface RecipeProps {
@@ -27,6 +28,7 @@ interface RecipeProps {
   instruction: string;
   photo_path: string;
   cooking_time: string;
+  recipe_ingredients: Ingredient[];
 }
 
 const Recipes: React.FC = () => {
@@ -47,6 +49,7 @@ const Recipes: React.FC = () => {
     instruction: "",
     photo_path: "",
     cooking_time: "",
+    recipe_ingredients: [],
   });
   const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
     null
@@ -87,19 +90,26 @@ const Recipes: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
-  // const availableRecipes = recipes.filter((recipe) => {
-  //   return recipe.ingredients.every((ingredient) => {
-  //     const item = groceryItems.find(
-  //       (groceryItem) =>
-  //         groceryItem.name.toLowerCase() === ingredient.name.toLowerCase()
-  //     );
-  //     return item && item.quantity >= ingredient.quantity;
-  //   });
-  // });
+  const availableRecipes = recipes.filter((recipe) => {
+    return recipe.recipe_ingredients.every((ingredient) => {
+      const item = groceryItems.find(
+        (groceryItem) =>
+          groceryItem.name.toLowerCase() ===
+          ingredient.ingredient_name.toLowerCase()
+      );
+      return item && item.quantity >= ingredient.ingredient_quantity;
+    });
+  });
 
-  // const filteredRecipes = availableRecipes.filter((recipe) =>
-  //   recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+  console.log(
+    availableRecipes.filter((recipe) =>
+      recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const filteredRecipes = availableRecipes.filter((recipe) =>
+    recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleAddRecipe = () => {
     setIsModalOpen(true);
@@ -114,6 +124,7 @@ const Recipes: React.FC = () => {
       instruction: "",
       photo_path: "",
       cooking_time: "",
+      recipe_ingredients: [],
     });
     setImagePreview(null);
   };
@@ -142,22 +153,22 @@ const Recipes: React.FC = () => {
     setNewRecipe((prev) => ({ ...prev, [name]: value }));
   };
 
-  // const handleAddIngredient = () => {
-  //   setNewRecipe((prev) => ({
-  //     ...prev,
-  //     ingredients: [...prev.ingredients, { name: "", quantity: 1 }],
-  //   }));
-  // };
+  const handleAddIngredient = () => {
+    setNewRecipe((prev) => ({
+      ...prev,
+      ingredients: [...prev.recipe_ingredients, { name: "", quantity: 1 }],
+    }));
+  };
 
-  // const handleIngredientChange = (
-  //   index: number,
-  //   e: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   const { name, value } = e.target;
-  //   const ingredients = [...newRecipe.ingredients];
-  //   ingredients[index] = { ...ingredients[index], [name]: value };
-  //   setNewRecipe((prev) => ({ ...prev, ingredients }));
-  // };
+  const handleIngredientChange = (
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
+    const ingredients = [...newRecipe.recipe_ingredients];
+    ingredients[index] = { ...ingredients[index], [field]: value };
+    setNewRecipe((prev) => ({ ...prev, ingredients }));
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -176,6 +187,15 @@ const Recipes: React.FC = () => {
 
   const handleSaveRecipe = async () => {
     const newForm = removeProperty(newRecipe, "recipe_id");
+    const newErrors: string[] = [];
+
+    newRecipe.recipe_ingredients.forEach((ingredient, index) => {
+      if (ingredient.ingredient_quantity <= 0) {
+        newErrors.push(
+          `Ingredient ${index + 1} must have a quantity greater than 0.`
+        );
+      }
+    });
     console.log(newForm);
     const response = await axios.post(
       process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/add-recipe",
@@ -207,6 +227,7 @@ const Recipes: React.FC = () => {
       instruction: "",
       photo_path: "",
       cooking_time: "",
+      recipe_ingredients: [],
     });
     setIsModalOpen(false);
     setImagePreview(null);
@@ -257,16 +278,16 @@ const Recipes: React.FC = () => {
             {recipes.map((recipe) => (
               <RecipeCard
                 key={recipe.recipe_id}
-                // id={recipe.recipe_id.toString()}
+                id={recipe.recipe_id.toString()}
                 name={recipe.recipe_name}
-                // ingredients={recipe.ingredients}
+                ingredients={recipe.recipe_ingredients}
                 image={recipe.photo_path}
                 cookingTime={recipe.cooking_time}
                 deleteRecipe={() => handleDeleteRecipe(recipe)}
-                toggleFavorite={function (): void {
-                  throw new Error("Function not implemented.");
-                }}
-                isFavorite={false}
+                toggleFavorite={() =>
+                  toggleFavorite(recipe.recipe_id.toString())
+                }
+                isFavorite={isRecipeFavorite(recipe.recipe_id.toString())}
               />
             ))}
           </div>
@@ -338,33 +359,45 @@ const Recipes: React.FC = () => {
 
           <div className="mb-4">
             <h3 className="text-xl font-bold">Ingredients</h3>
-            {/* {newRecipe.ingredients.map((ingredient, index) => ( */}
+            {newRecipe.recipe_ingredients.map((ingredient, index) => (
+              <div key={index} className="flex gap-2 mb-2">
+                <select
+                  value={ingredient.ingredient_name}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "name", e.target.value)
+                  }
+                  className="w-1/2 p-2 border rounded"
+                >
+                  <option value="" disabled>
+                    Select Ingredient
+                  </option>
+                  {groceryItems.map((item) => (
+                    <option key={item.name} value={item.name}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  name="quantity"
+                  value={ingredient.ingredient_quantity}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "quantity", e.target.value)
+                  }
+                  className="w-1/2 p-2 border rounded"
+                  placeholder="Quantity"
+                />
+              </div>
+            ))}
             <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                name="name"
-                // value={ingredient.name}
-                // onChange={(e) => handleIngredientChange(index, e)}
-                className="w-1/2 p-2 border rounded"
-                placeholder="Ingredient Name"
-              />
-              <input
-                type="number"
-                name="quantity"
-                // value={ingredient.quantity}
-                // onChange={(e) => handleIngredientChange(index, e)}
-                className="w-1/2 p-2 border rounded"
-                placeholder="Quantity"
-              />
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 text-sm"
+                onClick={handleAddIngredient}
+              >
+                <FaPlus className="w-2" />
+                <p>Add Ingredient</p>
+              </button>
             </div>
-            {/* ))} */}
-            <button
-              className="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 text-sm"
-              // onClick={handleAddIngredient}
-            >
-              <FaPlus className="w-2" />
-              <p>Add</p>
-            </button>
           </div>
 
           <div className="flex justify-end">

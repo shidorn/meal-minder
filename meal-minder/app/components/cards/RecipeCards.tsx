@@ -4,9 +4,9 @@ import { FaRegClock, FaShare, FaTrash } from "react-icons/fa";
 import { GoStar } from "react-icons/go";
 
 interface RecipeCardProps {
-  // id: string;
+  id: string;
   name: string;
-  // ingredients: { name: string; quantity: number }[];
+  ingredients: { ingredient_name: string; ingredient_quantity: number }[];
   image: string;
   cookingTime: string;
   deleteRecipe: (id: string) => void;
@@ -17,7 +17,7 @@ interface RecipeCardProps {
 const RecipeCard: React.FC<RecipeCardProps> = ({
   // id,
   name,
-  // ingredients,
+  ingredients,
   image,
   cookingTime,
   deleteRecipe,
@@ -83,13 +83,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       </h2>
 
       <h3 className="text-md mt-2 p-2">Ingredients:</h3>
-      {/* <ul className="list-disc list-inside">
+      <ul className="list-disc list-inside">
         {ingredients.map((ingredient, index) => (
           <li key={index}>
-            {ingredient.name} - {ingredient.quantity}
+            {ingredient.ingredient_name} - {ingredient.ingredient_quantity}
           </li>
         ))}
-      </ul> */}
+      </ul>
       <p className="flex items-center text-sm gap-2 mt-2 text-gray-400 mb-4 p-2">
         <FaRegClock /> {cookingTime}
       </p>
