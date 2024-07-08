@@ -29,7 +29,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       const userData = await getUserDataFromAPI();
-      console.log(userData);
+      // console.log(userData);
       setUser(userData);
     };
 
@@ -60,7 +60,7 @@ const getUserDataFromAPI = async (): Promise<User> => {
     process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/getUser",
     email
   );
-  console.log(response.data.username);
+  // console.log(response.data.username);
   localStorage.setItem("user_name", response.data.username);
   localStorage.setItem("first_name", response.data.first_name);
   return {

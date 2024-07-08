@@ -8,18 +8,25 @@ import RecipeCard from "@/app/components/cards/RecipeCards";
 import Modal from "@/app/components/modal/Modal";
 import { FaPlus } from "react-icons/fa";
 import SearchBar from "@/app/components/search-bar/SearchBar";
-
+import {
+  checkTokenExpiration,
+  getAccessToken,
+  logout,
+  setupTokenExpirationCheck,
+} from "@/app/auth";
+import { removeProperty } from "@/app/utils/removeProperty";
 interface Ingredient {
   name: string;
   quantity: number;
 }
 
 interface RecipeProps {
-  id: string;
-  name: string;
-  image: string;
-  ingredients: Ingredient[];
-  cookingTime: string;
+  recipe_id: number;
+  recipe_name: string;
+  description: string;
+  instruction: string;
+  photo_path: string;
+  cooking_time: string;
 }
 
 const Recipes: React.FC = () => {
@@ -34,47 +41,64 @@ const Recipes: React.FC = () => {
     null
   );
   const [newRecipe, setNewRecipe] = useState<RecipeProps>({
-    id: "",
-    name: "",
-    image: "",
-    ingredients: [],
-    cookingTime: "",
+    recipe_id: 0,
+    recipe_name: "",
+    description: "",
+    instruction: "",
+    photo_path: "",
+    cooking_time: "",
   });
   const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
     null
   );
   const [searchTerm, setSearchTerm] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     router.push("/login");
-  //   }
+  useEffect(() => {
+    checkTokenExpiration().catch(console.error);
+    setupTokenExpirationCheck();
+    const token = getAccessToken();
+    if (!token) {
+      logout(); // Redirect to login if no token is available
+      return;
+    }
 
-  //   axios
-  //     .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then(() => setLoading(false))
-  //     .catch((error) => {
-  //       console.log(error);
-  //       router.push("/login");
-  //     });
-  // }, [router]);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/recipe-list",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log(response.data);
+        const responseData: RecipeProps[] = response.data;
+        const uniqueRecipe = new Set(recipes.map((item) => item.recipe_id));
+        responseData.forEach((item) => {
+          if (!uniqueRecipe.has(item.recipe_id)) {
+            recipes.push(item);
+          }
+        });
+        setRecipes((recipes) => [...recipes]);
+      } catch (error) {
+        console.log(error);
+        logout();
+      }
+    };
+    fetchData();
+  }, [router]);
 
-  const availableRecipes = recipes.filter((recipe) => {
-    return recipe.ingredients.every((ingredient) => {
-      const item = groceryItems.find(
-        (groceryItem) =>
-          groceryItem.name.toLowerCase() === ingredient.name.toLowerCase()
-      );
-      return item && item.quantity >= ingredient.quantity;
-    });
-  });
+  // const availableRecipes = recipes.filter((recipe) => {
+  //   return recipe.ingredients.every((ingredient) => {
+  //     const item = groceryItems.find(
+  //       (groceryItem) =>
+  //         groceryItem.name.toLowerCase() === ingredient.name.toLowerCase()
+  //     );
+  //     return item && item.quantity >= ingredient.quantity;
+  //   });
+  // });
 
-  const filteredRecipes = availableRecipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredRecipes = availableRecipes.filter((recipe) =>
+  //   recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
   const handleAddRecipe = () => {
     setIsModalOpen(true);
@@ -83,11 +107,12 @@ const Recipes: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setNewRecipe({
-      id: "",
-      name: "",
-      image: "",
-      ingredients: [],
-      cookingTime: "",
+      recipe_id: 0,
+      recipe_name: "",
+      description: "",
+      instruction: "",
+      photo_path: "",
+      cooking_time: "",
     });
     setImagePreview(null);
   };
@@ -99,7 +124,11 @@ const Recipes: React.FC = () => {
 
   const confirmDeleteRecipe = () => {
     if (selectedRecipe) {
-      setRecipes(recipes.filter((recipe) => recipe.id !== selectedRecipe.id));
+      setRecipes(
+        recipes.filter(
+          (recipe) => recipe.recipe_id !== selectedRecipe.recipe_id
+        )
+      );
       setIsDeleteModalVisible(false);
       setSelectedRecipe(null);
     }
@@ -112,46 +141,71 @@ const Recipes: React.FC = () => {
     setNewRecipe((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddIngredient = () => {
-    setNewRecipe((prev) => ({
-      ...prev,
-      ingredients: [...prev.ingredients, { name: "", quantity: 1 }],
-    }));
-  };
+  // const handleAddIngredient = () => {
+  //   setNewRecipe((prev) => ({
+  //     ...prev,
+  //     ingredients: [...prev.ingredients, { name: "", quantity: 1 }],
+  //   }));
+  // };
 
-  const handleIngredientChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = e.target;
-    const ingredients = [...newRecipe.ingredients];
-    ingredients[index] = { ...ingredients[index], [name]: value };
-    setNewRecipe((prev) => ({ ...prev, ingredients }));
-  };
+  // const handleIngredientChange = (
+  //   index: number,
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   const { name, value } = e.target;
+  //   const ingredients = [...newRecipe.ingredients];
+  //   ingredients[index] = { ...ingredients[index], [name]: value };
+  //   setNewRecipe((prev) => ({ ...prev, ingredients }));
+  // };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
-        setNewRecipe((prev) => ({ ...prev, image: reader.result as string }));
+        setFile(selectedFile);
+        newRecipe.photo_path = "/images/" + selectedFile.name;
+        // setNewRecipe((prev) => ({ ...prev, photo: reader.result as string }));
       };
-      reader.readAsDataURL(file);
+      console.log(selectedFile);
+      reader.readAsDataURL(selectedFile);
     }
   };
 
-  const handleSaveRecipe = () => {
-    setRecipes([
-      ...recipes,
-      { ...newRecipe, id: (recipes.length + 1).toString() },
-    ]);
+  const handleSaveRecipe = async () => {
+    const newForm = removeProperty(newRecipe, "recipe_id");
+    console.log(newForm);
+    const response = await axios.post(
+      process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/add-recipe",
+      newForm
+    );
+
+    if (!file) {
+      return;
+    }
+
+    const imgFile = new FormData();
+    imgFile.append("imgFile", file);
+    if (response.status === 201) {
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/image",
+        imgFile,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      console.log(response);
+    }
+
+    setRecipes([...recipes, { ...newRecipe, recipe_id: recipes.length + 1 }]);
     setNewRecipe({
-      id: "",
-      name: "",
-      image: "",
-      ingredients: [],
-      cookingTime: "",
+      recipe_id: 0,
+      recipe_name: "",
+      description: "",
+      instruction: "",
+      photo_path: "",
+      cooking_time: "",
     });
     setIsModalOpen(false);
     setImagePreview(null);
@@ -195,19 +249,23 @@ const Recipes: React.FC = () => {
             </button>
           </div>
         </div>
-        {availableRecipes.length === 0 ? (
+        {recipes.length === 0 ? (
           <p>No recipes can be made with the current inventory.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availableRecipes.map((recipe) => (
+            {recipes.map((recipe) => (
               <RecipeCard
-                key={recipe.id}
-                id={recipe.id}
-                name={recipe.name}
-                ingredients={recipe.ingredients}
-                image={recipe.image}
-                cookingTime={recipe.cookingTime}
+                key={recipe.recipe_id}
+                // id={recipe.recipe_id.toString()}
+                name={recipe.recipe_name}
+                // ingredients={recipe.ingredients}
+                image={recipe.photo_path}
+                cookingTime={recipe.cooking_time}
                 deleteRecipe={() => handleDeleteRecipe(recipe)}
+                toggleFavorite={function (): void {
+                  throw new Error("Function not implemented.");
+                }}
+                isFavorite={false}
               />
             ))}
           </div>
@@ -223,8 +281,28 @@ const Recipes: React.FC = () => {
             <label className="block text-gray-700">Recipe Name</label>
             <input
               type="text"
-              name="name"
-              value={newRecipe.name}
+              name="recipe_name"
+              value={newRecipe.recipe_name}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Recipe Description</label>
+            <input
+              type="text"
+              name="description"
+              value={newRecipe.description}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Instructions</label>
+            <input
+              type="text"
+              name="instruction"
+              value={newRecipe.instruction}
               onChange={handleChange}
               className="w-full p-2 border rounded"
             />
@@ -238,6 +316,7 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
             {imagePreview && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imagePreview as string}
                 alt="Preview"
@@ -249,42 +328,44 @@ const Recipes: React.FC = () => {
             <label className="block text-gray-700">Cooking Time</label>
             <input
               type="text"
-              name="cookingTime"
-              value={newRecipe.cookingTime}
+              name="cooking_time"
+              value={newRecipe.cooking_time}
               onChange={handleChange}
               className="w-full p-2 border rounded"
             />
           </div>
+
           <div className="mb-4">
             <h3 className="text-xl font-bold">Ingredients</h3>
-            {newRecipe.ingredients.map((ingredient, index) => (
-              <div key={index} className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  name="name"
-                  value={ingredient.name}
-                  onChange={(e) => handleIngredientChange(index, e)}
-                  className="w-1/2 p-2 border rounded"
-                  placeholder="Ingredient Name"
-                />
-                <input
-                  type="number"
-                  name="quantity"
-                  value={ingredient.quantity}
-                  onChange={(e) => handleIngredientChange(index, e)}
-                  className="w-1/2 p-2 border rounded"
-                  placeholder="Quantity"
-                />
-              </div>
-            ))}
+            {/* {newRecipe.ingredients.map((ingredient, index) => ( */}
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                name="name"
+                // value={ingredient.name}
+                // onChange={(e) => handleIngredientChange(index, e)}
+                className="w-1/2 p-2 border rounded"
+                placeholder="Ingredient Name"
+              />
+              <input
+                type="number"
+                name="quantity"
+                // value={ingredient.quantity}
+                // onChange={(e) => handleIngredientChange(index, e)}
+                className="w-1/2 p-2 border rounded"
+                placeholder="Quantity"
+              />
+            </div>
+            {/* ))} */}
             <button
               className="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 text-sm"
-              onClick={handleAddIngredient}
+              // onClick={handleAddIngredient}
             >
               <FaPlus className="w-2" />
               <p>Add</p>
             </button>
           </div>
+
           <div className="flex justify-end">
             <button
               className="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded"
@@ -302,7 +383,7 @@ const Recipes: React.FC = () => {
       >
         <div className="p-4">
           <p className="text-xl font-bold mb-10 text-center">
-            Are you sure you want to delete {selectedRecipe?.name}?
+            Are you sure you want to delete {selectedRecipe?.recipe_name}?
           </p>
           <div className="flex justify-end">
             <button

@@ -4,9 +4,9 @@ import { FaRegClock, FaShare, FaTrash } from "react-icons/fa";
 import { GoStar } from "react-icons/go";
 
 interface RecipeCardProps {
-  id: string;
+  // id: string;
   name: string;
-  ingredients: { name: string; quantity: number }[];
+  // ingredients: { name: string; quantity: number }[];
   image: string;
   cookingTime: string;
   deleteRecipe: (id: string) => void;
@@ -15,9 +15,9 @@ interface RecipeCardProps {
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
-  id,
+  // id,
   name,
-  ingredients,
+  // ingredients,
   image,
   cookingTime,
   deleteRecipe,
@@ -39,17 +39,17 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleShare = (platform: string) => {
-    const recipeUrl = `${window.location.origin}/recipe/${id}`;
-    if (platform === "copy") {
-      navigator.clipboard.writeText(recipeUrl);
-      alert("Link copied to clipboard!");
-    } else if (platform === "family") {
-      // Add your logic to share with family members here
-      alert("Shared with family members!");
-    }
-    setIsDropdownOpen(false);
-  };
+  // const handleShare = (platform: string) => {
+  //   const recipeUrl = `${window.location.origin}/recipe/${id}`;
+  //   if (platform === "copy") {
+  //     navigator.clipboard.writeText(recipeUrl);
+  //     alert("Link copied to clipboard!");
+  //   } else if (platform === "family") {
+  //     // Add your logic to share with family members here
+  //     alert("Shared with family members!");
+  //   }
+  //   setIsDropdownOpen(false);
+  // };
 
   return (
     <div
@@ -83,13 +83,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       </h2>
 
       <h3 className="text-md mt-2 p-2">Ingredients:</h3>
-      <ul className="list-disc list-inside">
+      {/* <ul className="list-disc list-inside">
         {ingredients.map((ingredient, index) => (
           <li key={index}>
             {ingredient.name} - {ingredient.quantity}
           </li>
         ))}
-      </ul>
+      </ul> */}
       <p className="flex items-center text-sm gap-2 mt-2 text-gray-400 mb-4 p-2">
         <FaRegClock /> {cookingTime}
       </p>
@@ -97,7 +97,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       <div className="flex items-center justify-around p-2 text-sm relative">
         <div>
           <FaShare onClick={toggleDropdown} className="cursor-pointer" />
-          {isDropdownOpen && (
+          {/* {isDropdownOpen && (
             <div className="absolute top-full left-10 mt-2 w-40 bg-white border rounded shadow-lg z-10">
               <p
                 onClick={() => handleShare("copy")}
@@ -112,7 +112,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 Share with Family Members
               </p>
             </div>
-          )}
+          )} */}
         </div>
         <p>
           <GoStar
@@ -120,9 +120,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             onClick={toggleFavorite}
           />
         </p>
-        <p onClick={() => deleteRecipe(id)} className="cursor-pointer">
+        {/* <p onClick={() => deleteRecipe(id)} className="cursor-pointer">
           <FaTrash />
-        </p>
+        </p> */}
       </div>
     </div>
   );

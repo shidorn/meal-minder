@@ -72,6 +72,7 @@ const GroceryItemsPage = () => {
       }
     };
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const openModal = () => setIsModalOpen(true);
@@ -211,10 +212,12 @@ const GroceryItemsPage = () => {
   const isFormValid = () =>
     formData.item_name && formData.item_quantity > 0 && formData.item_category;
 
+  const listsToRender = searchTerm.trim() === "" ? groceryItems : filteredItems;
+
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = listsToRender.slice(indexOfFirstItem, indexOfLastItem);
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
@@ -241,7 +244,11 @@ const GroceryItemsPage = () => {
             />
           </div>
           <div className="mr-72">
-            <SearchBar onSearch={() => {}} />
+            <SearchBar
+              onSearch={() => {
+                handleSearch;
+              }}
+            />
           </div>
         </div>
 

@@ -45,9 +45,9 @@ const GroceryLists = () => {
       headers: { Authorization: `Bearer ${token}` },
     };
 
-    if (searchQuery.trim() === "") {
-      setFilteredLists([]);
-    }
+    // if (searchQuery.trim() === "") {
+    //   setFilteredLists([]);
+    // }
 
     if (searchQuery.trim() === "") {
       setFilteredLists([]);
@@ -101,7 +101,7 @@ const GroceryLists = () => {
         setGroceryLists((groceryLists) => [...groceryLists]);
       } catch (error) {
         console.log(error);
-        router.push("/login");
+        logout();
       }
     };
 
@@ -217,7 +217,11 @@ const GroceryLists = () => {
             />
           </div>
           <div className="mr-72">
-            <SearchBar onSearch={() => {}} />
+            <SearchBar
+              onSearch={() => {
+                handleSearch;
+              }}
+            />
           </div>
         </div>
 
@@ -238,7 +242,7 @@ const GroceryLists = () => {
               <th className="py-2 px-4 text-left">Action</th>
             </tr>
           </thead>
-          {groceryLists.length === 0 ? (
+          {currentItems.length === 0 ? (
             <tbody>
               <tr>
                 <td></td>
@@ -254,7 +258,7 @@ const GroceryLists = () => {
             </tbody>
           ) : (
             <tbody>
-              {groceryLists.map((list) => (
+              {currentItems.map((list) => (
                 <tr key={list.grocery_id}>
                   <td className="border-t border-dashed p-6">
                     {list.grocery_name}
