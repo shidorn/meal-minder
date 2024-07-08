@@ -1,4 +1,3 @@
-"use client";
 import { ReactNode } from "react";
 import { UserProvider } from "@/context/UserProvider";
 import { GroceryProvider } from "@/context/GroceryContext";

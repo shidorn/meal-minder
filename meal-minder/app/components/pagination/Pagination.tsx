@@ -32,9 +32,13 @@ const Pagination: React.FC<PaginationProps> = ({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className=" flex items-center text-sm py-2 px-3 leading-tight text-red-900 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className=" flex items-center text-sm py-2 px-3 leading-tight text-red-900 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
-            <RiArrowDropLeftLine width={12} height={12} />
+            <RiArrowDropLeftLine
+              width={20}
+              height={20}
+              className="font-bold text-md"
+            />
             <p></p>
           </button>
         </li>
@@ -42,7 +46,7 @@ const Pagination: React.FC<PaginationProps> = ({
           <li key={number}>
             <button
               onClick={() => onPageChange(number)}
-              className={`py-2 px-3 leading-tight border border-gray-300 ${
+              className={`py-2 px-3 leading-tight ${
                 number === currentPage
                   ? "text-red-900 bg-blue-50 hover:bg-blue-100 hover:text-blue-700"
                   : "text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700"
@@ -56,10 +60,14 @@ const Pagination: React.FC<PaginationProps> = ({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="flex items-center text-sm py-2 px-3 leading-tight text-red-900 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className="flex items-center text-sm py-2 px-3 leading-tight text-red-900 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
           >
             <p></p>
-            <RiArrowDropRightLine width={12} height={12} />
+            <RiArrowDropRightLine
+              width={20}
+              height={20}
+              className="font-bold"
+            />
           </button>
         </li>
       </ul>

@@ -27,6 +27,7 @@ const Inventory: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
   const [groceryItemsList, setGroceryItemsList] = useState<GroceryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     checkTokenExpiration().catch(console.error);
@@ -55,7 +56,6 @@ const Inventory: React.FC = () => {
             "/groceries/item-list-purchased",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log(response);
         const respData: GroceryItem[] = response.data;
         const uniqueGroceryItems = new Set(
           groceryItemsList.map((item) => item.item_id)
@@ -66,7 +66,6 @@ const Inventory: React.FC = () => {
           }
         });
         setGroceryItemsList((groceryItemsList) => [...groceryItemsList]);
-        console.log(groceryItemsList);
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -77,6 +76,47 @@ const Inventory: React.FC = () => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+  };
+
+  const getStockLevel = (quantity: number): string => {
+    if (quantity < 2) return "Low";
+    if (quantity < 5) return "Average";
+    return "High";
+  };
+
+  // Function to aggregate quantities of items with the same name
+  const aggregateQuantities = (items: GroceryItem[]) => {
+    const aggregatedItems: { [key: string]: GroceryItem } = {};
+
+    items.forEach((item) => {
+      if (aggregatedItems[item.item_name]) {
+        aggregatedItems[item.item_name].item_quantity += item.item_quantity;
+      } else {
+        aggregatedItems[item.item_name] = { ...item };
+      }
+    });
+
+    return Object.values(aggregatedItems);
+  };
+
+  const aggregatedItems = aggregateQuantities(groceryItemsList);
+
+  const filteredItems = aggregatedItems.filter((item) =>
+    item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   if (loading) {
     return (
@@ -89,39 +129,19 @@ const Inventory: React.FC = () => {
     );
   }
 
-  const getStockLevel = (quantity: number): string => {
-    if (quantity < 2) return "Low";
-    if (quantity < 5) return "Average";
-    return "High";
-  };
-
-  const purchasedItems = groceryItemsList;
-
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = purchasedItems.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(purchasedItems.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
   return (
-    <div className="container flex flex-col mx-auto p-4">
-      <div className="mb-4 self-end">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </div>
-      {purchasedItems.length === 0 ? (
+    <div className="container mx-auto p-4">
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+
+      {filteredItems.length === 0 ? (
         <p>No items purchased yet.</p>
       ) : (
-        <table className="min-w-full overflow-hidden mb-4">
-          <thead className="">
+        <table className="min-w-full mt-10 bg-white shadow-md rounded-lg overflow-hidden mb-4">
+          <thead className="bg-gray-200">
             <tr>
               <th className="py-2 px-4 text-left">Name</th>
               <th className="py-2 px-4 text-left">Quantity</th>
@@ -135,7 +155,7 @@ const Inventory: React.FC = () => {
                 <td className="py-2 px-4">{item.item_name}</td>
                 <td className="py-2 px-4">{item.item_quantity}</td>
                 <td className="py-2 px-4">{item.item_category}</td>
-                <td className="py-3">
+                <td className="py-2 px-4">
                   <div
                     className={`py-2 px-4 text-white w-28 rounded-full text-center ${
                       getStockLevel(item.item_quantity) === "Low"

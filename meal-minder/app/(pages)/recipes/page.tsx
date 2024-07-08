@@ -25,6 +25,7 @@ interface RecipeProps {
 const Recipes: React.FC = () => {
   const router = useRouter();
   const { groceryItems } = useGroceryContext();
+  const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [recipes, setRecipes] = useState<RecipeProps[]>([]);
   const [favoriteRecipes, setFavoriteRecipes] = useState<string[]>([]);
@@ -121,11 +122,11 @@ const Recipes: React.FC = () => {
 
   const handleIngredientChange = (
     index: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    field: string,
+    value: string | number
   ) => {
-    const { name, value } = e.target;
     const ingredients = [...newRecipe.ingredients];
-    ingredients[index] = { ...ingredients[index], [name]: value };
+    ingredients[index] = { ...ingredients[index], [field]: value };
     setNewRecipe((prev) => ({ ...prev, ingredients }));
   };
 
@@ -142,6 +143,20 @@ const Recipes: React.FC = () => {
   };
 
   const handleSaveRecipe = () => {
+    const newErrors: string[] = [];
+
+    newRecipe.ingredients.forEach((ingredient, index) => {
+      if (ingredient.quantity <= 0) {
+        newErrors.push(
+          `Ingredient ${index + 1} must have a quantity greater than 0.`
+        );
+      }
+    });
+
+    if (newErrors.length > 0) {
+      setErrors(newErrors);
+      return;
+    }
     setRecipes([
       ...recipes,
       { ...newRecipe, id: (recipes.length + 1).toString() },
@@ -261,31 +276,43 @@ const Recipes: React.FC = () => {
             <h3 className="text-xl font-bold">Ingredients</h3>
             {newRecipe.ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  name="name"
+                <select
                   value={ingredient.name}
-                  onChange={(e) => handleIngredientChange(index, e)}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "name", e.target.value)
+                  }
                   className="w-1/2 p-2 border rounded"
-                  placeholder="Ingredient Name"
-                />
+                >
+                  <option value="" disabled>
+                    Select Ingredient
+                  </option>
+                  {groceryItems.map((item) => (
+                    <option key={item.name} value={item.name}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="number"
                   name="quantity"
                   value={ingredient.quantity}
-                  onChange={(e) => handleIngredientChange(index, e)}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "quantity", e.target.value)
+                  }
                   className="w-1/2 p-2 border rounded"
                   placeholder="Quantity"
                 />
               </div>
             ))}
-            <button
-              className="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 text-sm"
-              onClick={handleAddIngredient}
-            >
-              <FaPlus className="w-2" />
-              <p>Add</p>
-            </button>
+            <div className="flex gap-2 mb-2">
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 text-sm"
+                onClick={handleAddIngredient}
+              >
+                <FaPlus className="w-2" />
+                <p>Add Ingredient</p>
+              </button>
+            </div>
           </div>
           <div className="flex justify-end">
             <button
