@@ -242,56 +242,39 @@ const GroceryLists = () => {
               <th className="py-2 px-4 text-left">Action</th>
             </tr>
           </thead>
-          {currentItems.length === 0 ? (
-            <tbody>
-              <tr>
-                <td></td>
-                <td className="py-6">
-                  <div className="flex flex-col gap-6 justify-center items-center space-x-2">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-                    <span className="text-lg font-bold">Loading</span>
-                  </div>
+          <tbody>
+            {currentItems.map((list) => (
+              <tr key={list.grocery_id}>
+                <td className="border-t border-dashed p-6">
+                  {list.grocery_name}
                 </td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tbody>
-          ) : (
-            <tbody>
-              {currentItems.map((list) => (
-                <tr key={list.grocery_id}>
-                  <td className="border-t border-dashed p-6">
-                    {list.grocery_name}
-                  </td>
-                  {/* <td className="border-t border-dashed py-2 px-4">
-                    {list.date_created}
-                  </td> */}
-                  <td className="border-t border-dashed py-2 px-4">
-                    {list.target_date}
-                  </td>
-                  <td
-                    className={`${
-                      list.status === "Pending"
-                        ? "text-yellow-600"
-                        : "text-green-700"
-                    } border-b border-dashed`}
+                <td className="border-t border-dashed py-2 px-4">
+                  {list.target_date}
+                </td>
+                <td
+                  className={`${
+                    list.status === "IN PROGRESS"
+                      ? "text-yellow-600"
+                      : list.status === "DONE"
+                      ? "text-green-700"
+                      : "text-gray-400"
+                  } border-b border-dashed font-bold`}
+                >
+                  {list.status}
+                </td>
+                <td className="border-t border-dashed py-2 px-4">
+                  <a
+                    onClick={() => handleViewList(list.grocery_id)}
+                    className="text-red-900 rounded  hover:font-semibold cursor-pointer"
                   >
-                    {list.status}
-                  </td>
-                  <td className="border-t border-dashed py-2 px-4">
-                    <a
-                      onClick={() => handleViewList(list.grocery_id)}
-                      className="text-red-900 rounded  hover:font-semibold cursor-pointer"
-                    >
-                      View List
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          )}
+                    View List
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
-        <div className="mt-4">
+        <div className="absolute bottom-10 left-1/2">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

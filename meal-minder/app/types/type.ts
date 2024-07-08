@@ -14,9 +14,9 @@ export interface Recipe {
 }
 
 export interface FamilyMember {
-  id: number;
-  email: string;
+  id?: number;
   first_name: string;
   last_name: string;
+  email: string;
   image: string;
 }
