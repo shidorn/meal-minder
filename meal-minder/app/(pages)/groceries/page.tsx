@@ -270,6 +270,8 @@ const GroceryLists = () => {
                   className={`${
                     list.status === "PENDING"
                       ? "text-yellow-600"
+                      : list.status === "IN PROGRESS"
+                      ? "text-yellow-700"
                       : list.status === "DONE"
                       ? "text-green-700"
                       : "text-gray-400"
