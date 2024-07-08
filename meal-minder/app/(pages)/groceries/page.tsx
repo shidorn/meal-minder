@@ -84,20 +84,37 @@ const GroceryLists = () => {
             uniqueGroceryLists.add(item.grocery_id);
             item.date_created = dateCreateOnly;
             item.target_date = dateTargetOnly;
-            // item.status = status(item.grocery_id);
+
             const resStatus = status(item.grocery_id);
             resStatus.then((result) => {
               item.status = result;
             });
-            // console.log(
-            //   resStatus.then((result) => {
-            //     console.log(result);
-            //   })
-            // );
-            // console.log(groceryLists);
+
+            response2Data.sort((a, b) => {
+              if (a.status === "DONE" && b.status !== "DONE") {
+                return 1;
+              }
+              if (a.status !== "DONE" && b.status === "DONE") {
+                return -1;
+              }
+              return 0;
+            });
             groceryLists.push(item);
           }
         });
+
+        // const updatedList = response2Data;
+
+        // updatedList.sort((a: { status: string }, b: { status: string }) => {
+        //   if (a.status === "DONE" && b.status !== "DONE") {
+        //     return 1;
+        //   }
+        //   if (a.status !== "DONE" && b.status === "DONE") {
+        //     return -1;
+        //   }
+        //   return 0;
+        // });
+
         setGroceryLists((groceryLists) => [...groceryLists]);
       } catch (error) {
         console.log(error);
@@ -162,9 +179,11 @@ const GroceryLists = () => {
         formData
       );
 
-      setGroceryLists([...groceryLists, response.data]);
+      // Prepend the new list item to the groceryLists array
+      setGroceryLists([response.data, ...groceryLists]);
     }
-    console.log(groceryListForm);
+
+    // Reset form data and close modal
     setFormData(groceryListForm);
     closeModal();
   };
@@ -249,7 +268,7 @@ const GroceryLists = () => {
                 </td>
                 <td
                   className={`${
-                    list.status === "IN PROGRESS"
+                    list.status === "PENDING"
                       ? "text-yellow-600"
                       : list.status === "DONE"
                       ? "text-green-700"

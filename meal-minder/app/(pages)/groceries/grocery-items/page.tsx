@@ -42,6 +42,7 @@ const GroceryItemsPage = () => {
   const listId = searchParams.get("id");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredItems, setFilteredItems] = useState<GroceryItem[]>([]);
+  const [listStatus, setListStatus] = useState<string>("");
 
   useEffect(() => {
     checkTokenExpiration().catch(console.error);
@@ -64,8 +65,27 @@ const GroceryItemsPage = () => {
         );
 
         const responseData: GroceryItem[] = response.data;
-        setGroceryItems(responseData);
-        setFilteredItems(responseData); // Initialize filtered items with all items
+
+        const purchasedItems = responseData.filter((item) => item.is_purchase);
+        const unPurchasedItems = responseData.filter(
+          (item) => !item.is_purchase
+        );
+
+        const updatedItems = [...unPurchasedItems, ...purchasedItems];
+
+        setGroceryItems(updatedItems);
+        setFilteredItems(updatedItems);
+
+        // Fetch and set list status
+        const statusResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/grocery-list-status/${listId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setListStatus(statusResponse.data[0].f0);
       } catch (error) {
         console.log(error);
         router.push("/login");
@@ -75,7 +95,13 @@ const GroceryItemsPage = () => {
     fetchData();
   }, [router, listId]);
 
-  const openModal = () => setIsModalOpen(true);
+  const openModal = () => {
+    if (listStatus !== "DONE") {
+      setIsModalOpen(true);
+    } else {
+      alert("You cannot add items to a list that is already marked as 'DONE'.");
+    }
+  };
   const closeModal = () => {
     setIsModalOpen(false);
     setFormData({
@@ -110,8 +136,9 @@ const GroceryItemsPage = () => {
         `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/add-item`,
         newItem
       );
-      setGroceryItems([...groceryItems, response.data]);
-      setFilteredItems([...groceryItems, response.data]); // Update filtered items
+
+      setGroceryItems([response.data, ...groceryItems]);
+      setFilteredItems([response.data, ...filteredItems]);
     } else {
       const updateFormData = {
         item_name: formData.item_name,
@@ -128,7 +155,11 @@ const GroceryItemsPage = () => {
         item.item_id === editItemId ? { ...item, ...updateFormData } : item
       );
       setGroceryItems(updatedItems);
-      setFilteredItems(updatedItems); // Update filtered items
+
+      const updatedFilteredItems = filteredItems.map((item) =>
+        item.item_id === editItemId ? { ...item, ...updateFormData } : item
+      );
+      setFilteredItems(updatedFilteredItems);
     }
 
     closeModal();
@@ -149,7 +180,11 @@ const GroceryItemsPage = () => {
       { id }
     );
     setGroceryItems(groceryItems.filter((item) => item.item_id !== id));
-    setFilteredItems(filteredItems.filter((item) => item.item_id !== id)); // Update filtered items
+
+    const updatedFilteredItems = filteredItems.filter(
+      (item) => item.item_id !== id
+    );
+    setFilteredItems(updatedFilteredItems);
   };
 
   const handleCheckboxChange = async (id: number, status: boolean) => {
@@ -162,11 +197,11 @@ const GroceryItemsPage = () => {
         item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
       )
     );
-    setFilteredItems(
-      filteredItems.map((item) =>
-        item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
-      )
-    ); // Update filtered items
+
+    const updatedFilteredItems = filteredItems.map((item) =>
+      item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
+    );
+    setFilteredItems(updatedFilteredItems);
   };
 
   const isFormValid = () =>
@@ -185,7 +220,7 @@ const GroceryItemsPage = () => {
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1);
     const filtered = groceryItems.filter(
       (item) =>
         item.is_purchase &&
@@ -225,7 +260,12 @@ const GroceryItemsPage = () => {
           </thead>
           <tbody>
             {currentItems.map((item) => (
-              <tr key={item.item_id} className="border-t border-dashed">
+              <tr
+                key={item.item_id}
+                className={`border-t border-dashed ${
+                  item.is_purchase ? "opacity-50" : ""
+                }`}
+              >
                 <td className="py-2 px-4">
                   <input
                     type="checkbox"
@@ -234,6 +274,7 @@ const GroceryItemsPage = () => {
                       handleCheckboxChange(item.item_id, item.is_purchase)
                     }
                     className="form-checkbox h-4 w-4"
+                    disabled={item.is_purchase}
                   />
                 </td>
                 <td className="py-2 px-4">{item.item_name}</td>
@@ -247,14 +288,18 @@ const GroceryItemsPage = () => {
                     : "User Not Available"}
                 </td>
                 <td className="py-2 px-4 flex gap-4">
-                  <FaEdit
-                    onClick={() => handleEditItem(item.item_id)}
-                    className="text-yellow-500 cursor-pointer"
-                  />
-                  <FaTrash
-                    onClick={() => handleDeleteItem(item.item_id)}
-                    className="text-red-500 cursor-pointer"
-                  />
+                  {!item.is_purchase && (
+                    <>
+                      <FaEdit
+                        onClick={() => handleEditItem(item.item_id)}
+                        className="text-yellow-500 cursor-pointer"
+                      />
+                      <FaTrash
+                        onClick={() => handleDeleteItem(item.item_id)}
+                        className="text-red-500 cursor-pointer"
+                      />
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
