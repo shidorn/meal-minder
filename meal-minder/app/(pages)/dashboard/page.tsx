@@ -78,8 +78,74 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div>
-        <h1>Welcome to Protected Dashboard</h1>
+      <div className="container w-full h-full p-2">
+        <div className="flex flex-col h-full ml-8">
+          <div className="grid grid-cols-2 gap-6 items-center p-2 w-full h-2/4">
+            <div className="flex flex-col gap-4 bg-white p-4 h-full rounded-lg shadow-lg">
+              <div className="flex gap-4 ">
+                <div className="bg-red-300 w-10 h-10 px-2 py-3 rounded-full">
+                  <FaUserFriends className="w-6 text-red-800" />
+                </div>
+                <div>
+                  <h1 className="font-bold">Members</h1>
+                  <p className="text-sm text-gray-400">
+                    {members.length} participants
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2">
+                {members.map((mem) => (
+                  <div key={mem.id} className="flex items-center p-4 gap-4">
+                    <Image
+                      src={mem.image}
+                      alt="profile"
+                      width={40}
+                      height={40}
+                      className="rounded-full shadow-lg"
+                    />
+                    <span className="flex flex-col">
+                      {mem.first_name} {mem.last_name}
+                      <span className="text-sm text-gray-400">{mem.email}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-4 bg-white p-4 h-full rounded-lg shadow-lg">
+              <div className="flex gap-4">
+                <div className="bg-red-300 w-10 h-10 px-2 py-3 rounded-full">
+                  <FaStar className="w-6 text-red-800" />
+                </div>
+                <div className="pt-3 font-bold">
+                  <h1>Favorite Recipes</h1>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 self-center">
+                {favoriteRecipes.map((recipe) => (
+                  <div key={recipe.id} className=" flex items-center p-4 gap-4">
+                    <FaStar className="text-yellow-600" />
+                    <p className="text-md">{recipe.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className=" h-2/4 p-2">
+            <div className="flex flex-col gap-4 bg-white p-4 h-full rounded-lg shadow-lg">
+              <div className="flex gap-4">
+                <div className="bg-red-300 w-10 h-10 px-2 py-3 rounded-full">
+                  <MdOutlineInventory className="w-6 text-red-800" />
+                </div>
+                <div className="pt-3">
+                  <h1 className="font-bold">Inventory</h1>
+                </div>
+              </div>
+              <div>
+                <Inventory />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </Layout>
   );
