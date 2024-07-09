@@ -46,23 +46,6 @@ const Recipes: React.FC = () => {
   );
   const [searchTerm, setSearchTerm] = useState("");
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     router.push("/login");
-  //   }
-
-  //   axios
-  //     .get(process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected", {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then(() => setLoading(false))
-  //     .catch((error) => {
-  //       console.log(error);
-  //       router.push("/login");
-  //     });
-  // }, [router]);
-
   const availableRecipes = recipes.filter((recipe) => {
     return recipe.ingredients.every((ingredient) => {
       const item = groceryItems.find(
@@ -146,6 +129,9 @@ const Recipes: React.FC = () => {
     const newErrors: string[] = [];
 
     newRecipe.ingredients.forEach((ingredient, index) => {
+      if (ingredient.name.trim() === "") {
+        newErrors.push(`Ingredient ${index + 1} must have a name.`);
+      }
       if (ingredient.quantity <= 0) {
         newErrors.push(
           `Ingredient ${index + 1} must have a quantity greater than 0.`
@@ -153,10 +139,15 @@ const Recipes: React.FC = () => {
       }
     });
 
+    if (newRecipe.name.trim() === "") {
+      newErrors.push("Recipe name is required.");
+    }
+
     if (newErrors.length > 0) {
       setErrors(newErrors);
       return;
     }
+
     setRecipes([
       ...recipes,
       { ...newRecipe, id: (recipes.length + 1).toString() },
@@ -186,6 +177,12 @@ const Recipes: React.FC = () => {
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
+  };
+
+  const isIngredientAvailable = (ingredientName: string) => {
+    return groceryItems.some(
+      (item) => item.name.toLowerCase() === ingredientName.toLowerCase()
+    );
   };
 
   return (
@@ -236,6 +233,15 @@ const Recipes: React.FC = () => {
           <h2 className="text-2xl text-center text-red-900 font-bold mb-6">
             Add New Recipe
           </h2>
+          {errors.length > 0 && (
+            <div className="mb-4">
+              {errors.map((error, index) => (
+                <p key={index} className="text-red-500">
+                  {error}
+                </p>
+              ))}
+            </div>
+          )}
           <div className="mb-4">
             <label className="block text-gray-700">Recipe Name</label>
             <input
@@ -276,28 +282,29 @@ const Recipes: React.FC = () => {
             <h3 className="text-xl font-bold">Ingredients</h3>
             {newRecipe.ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2 mb-2">
-                <select
+                <input
+                  type="text"
                   value={ingredient.name}
                   onChange={(e) =>
                     handleIngredientChange(index, "name", e.target.value)
                   }
-                  className="w-1/2 p-2 border rounded"
-                >
-                  <option value="" disabled>
-                    Select Ingredient
-                  </option>
-                  {groceryItems.map((item) => (
-                    <option key={item.name} value={item.name}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
+                  className={`w-1/2 p-2 border rounded ${
+                    isIngredientAvailable(ingredient.name)
+                      ? "border-green-500"
+                      : "border-red-500"
+                  }`}
+                  placeholder="Ingredient Name"
+                />
                 <input
                   type="number"
                   name="quantity"
                   value={ingredient.quantity}
                   onChange={(e) =>
-                    handleIngredientChange(index, "quantity", e.target.value)
+                    handleIngredientChange(
+                      index,
+                      "quantity",
+                      parseInt(e.target.value, 10)
+                    )
                   }
                   className="w-1/2 p-2 border rounded"
                   placeholder="Quantity"
