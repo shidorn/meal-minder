@@ -48,6 +48,15 @@ const GroceryItemsPage = () => {
     checkTokenExpiration().catch(console.error);
     setupTokenExpirationCheck();
 
+    if (searchTerm.trim() === "") {
+      setFilteredItems([]);
+    } else {
+      const filtered = groceryItems.filter((list) =>
+        list.item_name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredItems(filtered);
+    }
+
     const fetchData = async () => {
       try {
         const token = getAccessToken();
@@ -74,7 +83,7 @@ const GroceryItemsPage = () => {
         const updatedItems = [...unPurchasedItems, ...purchasedItems];
 
         setGroceryItems(updatedItems);
-        setFilteredItems(updatedItems);
+        // setFilteredItems(updatedItems);
 
         // Fetch and set list status
         const statusResponse = await axios.get(
@@ -88,11 +97,11 @@ const GroceryItemsPage = () => {
         setListStatus(statusResponse.data[0].f0);
       } catch (error) {
         console.log(error);
-        router.push("/login");
+        // router.push("/login");
       }
     };
     fetchData();
-  }, [router, listId]);
+  }, [router, listId, setFilteredItems, searchTerm]);
 
   const openModal = () => {
     if (listStatus !== "DONE") {
@@ -221,14 +230,17 @@ const GroceryItemsPage = () => {
   };
 
   const handleSearch = (term: string) => {
+    console.log(term);
     setSearchTerm(term);
-    setCurrentPage(1);
-    const filtered = groceryItems.filter(
-      (item) =>
-        item.is_purchase &&
-        item.item_name.toLowerCase().includes(term.toLowerCase())
-    );
-    setFilteredItems(filtered);
+    // setCurrentPage(1);
+    // const filtered = groceryItems.filter(
+    //   (item) =>
+    //     item.is_purchase &&
+    //     item.item_name.toLowerCase().includes(term.toLowerCase())
+    // );
+
+    // console.log(filtered);
+    // setFilteredItems(filtered);
   };
 
   return (
@@ -245,11 +257,7 @@ const GroceryItemsPage = () => {
             />
           </div>
           <div className="mr-72">
-            <SearchBar
-              onSearch={() => {
-                handleSearch;
-              }}
-            />
+            <SearchBar onSearch={handleSearch} />
           </div>
         </div>
 

@@ -222,6 +222,7 @@ const GroceryLists = () => {
   };
 
   const handleSearch = (query: string) => {
+    console.log(query);
     setSearchQuery(query);
   };
 
@@ -236,11 +237,7 @@ const GroceryLists = () => {
             />
           </div>
           <div className="mr-72">
-            <SearchBar
-              onSearch={() => {
-                handleSearch;
-              }}
-            />
+            <SearchBar onSearch={handleSearch} />
           </div>
         </div>
 

@@ -15,7 +15,7 @@ interface RecipeCardProps {
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
-  // id,
+  id,
   name,
   ingredients,
   image,
@@ -120,9 +120,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             onClick={toggleFavorite}
           />
         </p>
-        {/* <p onClick={() => deleteRecipe(id)} className="cursor-pointer">
+        <p onClick={() => deleteRecipe(id)} className="cursor-pointer">
           <FaTrash />
-        </p> */}
+        </p>
       </div>
     </div>
   );

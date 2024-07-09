@@ -81,6 +81,7 @@ const Inventory = () => {
   }, [router]);
 
   const handleSearch = (term: string) => {
+    console.log(term);
     setSearchTerm(term);
   };
 

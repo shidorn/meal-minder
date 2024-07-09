@@ -52,6 +52,10 @@ const Recipes: React.FC = () => {
     cooking_time: "",
     recipe_ingredients: [],
   });
+  // const [newIngredient, setNewIngredient] = useState<Ingredient>({
+  //   ingredient_name: "",
+  //   ingredient_quantity: 0,
+  // });
   const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
     null
   );
@@ -102,12 +106,6 @@ const Recipes: React.FC = () => {
     });
   });
 
-  console.log(
-    availableRecipes.filter((recipe) =>
-      recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
   const filteredRecipes = availableRecipes.filter((recipe) =>
     recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -135,7 +133,14 @@ const Recipes: React.FC = () => {
     setIsDeleteModalVisible(true);
   };
 
-  const confirmDeleteRecipe = () => {
+  const confirmDeleteRecipe = async () => {
+    console.log(selectedRecipe);
+    const id = selectedRecipe?.recipe_id;
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/recipes/delete-recipe`,
+      { id }
+    );
+    console.log(response);
     if (selectedRecipe) {
       setRecipes(
         recipes.filter(
@@ -157,7 +162,10 @@ const Recipes: React.FC = () => {
   const handleAddIngredient = () => {
     setNewRecipe((prev) => ({
       ...prev,
-      ingredients: [...prev.recipe_ingredients, { name: "", quantity: 1 }],
+      recipe_ingredients: [
+        ...prev.recipe_ingredients,
+        { ingredient_name: "", ingredient_quantity: 1 },
+      ],
     }));
   };
 
@@ -169,6 +177,16 @@ const Recipes: React.FC = () => {
     const ingredients = [...newRecipe.recipe_ingredients];
     ingredients[index] = { ...ingredients[index], [field]: value };
     setNewRecipe((prev) => ({ ...prev, ingredients }));
+    // setNewRecipe((prev) => ({
+    //   ...prev,
+    //   recipe_ingredients: [
+    //     ...prev.recipe_ingredients,
+    //     {
+    //       ingredient_name: ingredients[index].ingredient_name,
+    //       ingredient_quantity: ingredients[index].ingredient_quantity,
+    //     },
+    //   ],
+    // }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,9 +216,11 @@ const Recipes: React.FC = () => {
       }
     });
     console.log(newForm);
+    const noIngredForm = removeProperty(newForm, "recipe_ingredients");
+    console.log(noIngredForm);
     const response = await axios.post(
       process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/add-recipe",
-      newForm
+      noIngredForm
     );
 
     if (!file) {
@@ -247,6 +267,7 @@ const Recipes: React.FC = () => {
   };
 
   const handleSearch = (term: string) => {
+    console.log(term);
     setSearchTerm(term);
   };
 
@@ -257,7 +278,11 @@ const Recipes: React.FC = () => {
           <h1 className="text-3xl font-bold">Available Recipes</h1>
           <div className="flex items-center">
             <div className="mr-72">
-              <SearchBar onSearch={() => {}} />
+              <SearchBar
+                onSearch={() => {
+                  handleSearch;
+                }}
+              />
             </div>
           </div>
         </div>
@@ -272,6 +297,7 @@ const Recipes: React.FC = () => {
             </button>
           </div>
         </div>
+        {/* filteredRecipes */}
         {recipes.length === 0 ? (
           <p>No recipes can be made with the current inventory.</p>
         ) : (
@@ -365,7 +391,11 @@ const Recipes: React.FC = () => {
                 <select
                   value={ingredient.ingredient_name}
                   onChange={(e) =>
-                    handleIngredientChange(index, "name", e.target.value)
+                    handleIngredientChange(
+                      index,
+                      "ingredient_name",
+                      e.target.value
+                    )
                   }
                   className="w-1/2 p-2 border rounded"
                 >
@@ -383,7 +413,11 @@ const Recipes: React.FC = () => {
                   name="quantity"
                   value={ingredient.ingredient_quantity}
                   onChange={(e) =>
-                    handleIngredientChange(index, "quantity", e.target.value)
+                    handleIngredientChange(
+                      index,
+                      "ingredient_quantity",
+                      e.target.value
+                    )
                   }
                   className="w-1/2 p-2 border rounded"
                   placeholder="Quantity"
