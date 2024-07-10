@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserProvider";
 import { logout } from "@/app/auth";
 import { GoPersonFill, GoSignOut } from "react-icons/go";
+import Modal from "../modal/Modal";
 
 const Header: React.FC = () => {
   const { user } = useUser();
   const router = useRouter();
   const [ProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notifDropdown, setNotifDropdown] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleProfileSectionClick = () => {
     setProfileDropdownOpen(!ProfileDropdownOpen);
@@ -35,6 +37,13 @@ const Header: React.FC = () => {
     }
   }, [user]);
 
+  const handleModalOpen = () => {
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
   return (
     <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-20">
       <div className="flex items-center gap-4">
@@ -98,7 +107,7 @@ const Header: React.FC = () => {
                 <a
                   href="#"
                   className="flex items-center gap-4 px-4 py-2 text-gray-800 hover:text-red-900 hover:bg-gray-50"
-                  onClick={logout}
+                  onClick={handleModalOpen}
                 >
                   <GoSignOut />
                   Logout
@@ -108,6 +117,26 @@ const Header: React.FC = () => {
           </div>
         )}
       </div>
+
+      <Modal onClose={closeModal} isOpen={isModalVisible}>
+        <div className="flex flex-col items-center gap-6">
+          <p className="text-lg">Are you sure you want to logout?</p>
+          <div className="buttons flex flex-row items-center justify-center gap-4 w-full">
+            <button
+              onClick={closeModal}
+              className="text-md font-bold p-2 hover:text-red-800"
+            >
+              No
+            </button>
+            <button
+              onClick={logout}
+              className="text-md p-2 bg-red-800 text-white w-20 rounded-lg hover:bg-red-900"
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </Modal>
     </header>
   );
 };
