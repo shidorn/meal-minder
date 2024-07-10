@@ -9,6 +9,8 @@ interface RecipeCardProps {
   ingredients: { ingredient_name: string; ingredient_quantity: number }[];
   image: string;
   cookingTime: string;
+  instruction: string;
+  description: string;
   deleteRecipe: (id: string) => void;
   toggleFavorite: () => void;
   isFavorite: boolean;
@@ -20,12 +22,15 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   ingredients,
   image,
   cookingTime,
+  instruction,
+  description, // Add instruction to destructured props
   deleteRecipe,
   toggleFavorite,
   isFavorite,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showInstruction, setShowInstruction] = useState(false); // Add state for instructions
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -39,23 +44,16 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  // const handleShare = (platform: string) => {
-  //   const recipeUrl = `${window.location.origin}/recipe/${id}`;
-  //   if (platform === "copy") {
-  //     navigator.clipboard.writeText(recipeUrl);
-  //     alert("Link copied to clipboard!");
-  //   } else if (platform === "family") {
-  //     // Add your logic to share with family members here
-  //     alert("Shared with family members!");
-  //   }
-  //   setIsDropdownOpen(false);
-  // };
+  const toggleInstruction = () => {
+    setShowInstruction(!showInstruction);
+  };
 
   return (
     <div
-      className="card mb-4 border rounded-lg shadow"
+      className="card grid grid-rows-2 mb-4 border rounded-lg shadow"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={toggleInstruction} // Toggle instructions on card click
     >
       <div className="relative h-64 overflow-hidden rounded-t-lg mb-2">
         <Image
@@ -71,56 +69,69 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               className={`rounded-full p-2 text-white transition duration-300 ${
                 isFavorite ? "bg-yellow-500" : "bg-gray-700"
               }`}
-              onClick={toggleFavorite}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent card click from firing
+                toggleFavorite();
+              }}
             >
               <GoStar className="w-6 h-6" />
             </button>
           </div>
         )}
       </div>
-      <h2 className="text-md font-bold mb-2 text-center">
-        {name.toUpperCase()}
-      </h2>
+      <div>
+        <h2 className="text-md font-bold mb-2 text-center flex flex-col items-center">
+          {name.toUpperCase()}
+          <span className="text-xs font-medium text-gray-600">
+            {description}
+          </span>
+        </h2>
 
-      <h3 className="text-md mt-2 p-2">Ingredients:</h3>
-      <ul className="list-disc list-inside">
-        {ingredients.map((ingredient, index) => (
-          <li key={index}>
-            {ingredient.ingredient_name} - {ingredient.ingredient_quantity}
-          </li>
-        ))}
-      </ul>
-      <p className="flex items-center text-sm gap-2 mt-2 text-gray-400 mb-4 p-2">
-        <FaRegClock /> {cookingTime}
-      </p>
+        {showInstruction ? (
+          <div className="max-h-60 overflow-y-auto">
+            <p className="p-4 flex flex-col font-medium">
+              Instructions: <span className="text-gray-500">{instruction}</span>
+            </p>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-md mt-2 p-2">Ingredients:</h3>
+            <ul className="list-disc list-inside px-6 flex flex-col flex-wrap">
+              {ingredients.map((ingredient, index) => (
+                <li key={index}>
+                  {ingredient.ingredient_name} -{" "}
+                  {ingredient.ingredient_quantity}
+                </li>
+              ))}
+            </ul>
+            <p className="flex items-center text-sm gap-2 mt-2 text-gray-400 mb-4 p-2">
+              <FaRegClock /> {cookingTime}
+            </p>
+          </>
+        )}
+      </div>
       <hr />
+
       <div className="flex items-center justify-around p-2 text-sm relative">
         <div>
           <FaShare onClick={toggleDropdown} className="cursor-pointer" />
-          {/* {isDropdownOpen && (
-            <div className="absolute top-full left-10 mt-2 w-40 bg-white border rounded shadow-lg z-10">
-              <p
-                onClick={() => handleShare("copy")}
-                className="p-2 cursor-pointer hover:bg-gray-200"
-              >
-                Copy Link
-              </p>
-              <p
-                onClick={() => handleShare("family")}
-                className="p-2 cursor-pointer hover:bg-gray-200"
-              >
-                Share with Family Members
-              </p>
-            </div>
-          )} */}
         </div>
         <p>
           <GoStar
             className={`cursor-pointer ${isFavorite ? "text-yellow-500" : ""}`}
-            onClick={toggleFavorite}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click from firing
+              toggleFavorite();
+            }}
           />
         </p>
-        <p onClick={() => deleteRecipe(id)} className="cursor-pointer">
+        <p
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card click from firing
+            deleteRecipe(id);
+          }}
+          className="cursor-pointer"
+        >
           <FaTrash />
         </p>
       </div>
