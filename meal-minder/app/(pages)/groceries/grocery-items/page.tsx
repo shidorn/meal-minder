@@ -101,6 +101,7 @@ const GroceryItemsPage = () => {
       }
     };
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, listId, setFilteredItems, searchTerm]);
 
   const openModal = () => {

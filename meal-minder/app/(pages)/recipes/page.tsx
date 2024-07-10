@@ -176,17 +176,7 @@ const Recipes: React.FC = () => {
   ) => {
     const ingredients = [...newRecipe.recipe_ingredients];
     ingredients[index] = { ...ingredients[index], [field]: value };
-    setNewRecipe((prev) => ({ ...prev, ingredients }));
-    // setNewRecipe((prev) => ({
-    //   ...prev,
-    //   recipe_ingredients: [
-    //     ...prev.recipe_ingredients,
-    //     {
-    //       ingredient_name: ingredients[index].ingredient_name,
-    //       ingredient_quantity: ingredients[index].ingredient_quantity,
-    //     },
-    //   ],
-    // }));
+    setNewRecipe((prev) => ({ ...prev, recipe_ingredients: ingredients }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -222,6 +212,19 @@ const Recipes: React.FC = () => {
       process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/add-recipe",
       noIngredForm
     );
+    newRecipe.recipe_id = response.data.recipe_id;
+    newRecipe.recipe_ingredients.forEach((ingredient) => {
+      ingredient.ingredient_quantity = parseInt(
+        ingredient.ingredient_quantity.toString()
+      );
+    });
+    if (response.status === 201) {
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/add-ingredients",
+        newRecipe
+      );
+      console.log(response);
+    }
 
     if (!file) {
       return;
@@ -240,7 +243,11 @@ const Recipes: React.FC = () => {
       console.log(response);
     }
 
-    setRecipes([...recipes, { ...newRecipe, recipe_id: recipes.length + 1 }]);
+    // setRecipes([...recipes, { ...newRecipe }]);
+    setRecipes([
+      ...recipes,
+      { ...newRecipe, recipe_id: response.data.recipe_id },
+    ]);
     setNewRecipe({
       recipe_id: 0,
       recipe_name: "",
@@ -269,6 +276,12 @@ const Recipes: React.FC = () => {
   const handleSearch = (term: string) => {
     console.log(term);
     setSearchTerm(term);
+  };
+
+  const isIngredientAvailable = (ingredientName: string) => {
+    return groceryItems.some(
+      (item) => item.name.toLowerCase() === ingredientName.toLowerCase()
+    );
   };
 
   return (
@@ -388,7 +401,8 @@ const Recipes: React.FC = () => {
             <h3 className="text-xl font-bold">Ingredients</h3>
             {newRecipe.recipe_ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2 mb-2">
-                <select
+                <input
+                  type="text"
                   value={ingredient.ingredient_name}
                   onChange={(e) =>
                     handleIngredientChange(
@@ -397,17 +411,13 @@ const Recipes: React.FC = () => {
                       e.target.value
                     )
                   }
-                  className="w-1/2 p-2 border rounded"
-                >
-                  <option value="" disabled>
-                    Select Ingredient
-                  </option>
-                  {groceryItems.map((item) => (
-                    <option key={item.name} value={item.name}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
+                  className={`w-1/2 p-2 border rounded ${
+                    isIngredientAvailable(ingredient.ingredient_name)
+                      ? "border-green-500"
+                      : "border-red-500"
+                  }`}
+                  placeholder="Ingredient Name"
+                />
                 <input
                   type="number"
                   name="quantity"
