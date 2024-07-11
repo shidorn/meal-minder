@@ -50,9 +50,20 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     setShowInstruction(!showInstruction);
   };
 
+  const unAvailableIngredient = ingredients.some((ingredient) => {
+    return !inventory.some(
+      (item) =>
+        item.item_name.toLowerCase() ===
+          ingredient.ingredient_name.toLowerCase() &&
+        item.item_quantity >= ingredient.ingredient_quantity
+    );
+  });
+
   return (
     <div
-      className="card grid grid-rows-2 mb-4 border rounded-lg shadow"
+      className={`card grid grid-rows-2 mb-4 border rounded-lg shadow ${
+        unAvailableIngredient ? "border-red-500" : ""
+      }`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={toggleInstruction}
@@ -66,19 +77,27 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           className="rounded-t-lg"
         />
         {isHovered && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <button
-              className={`rounded-full p-2 text-white transition duration-300 ${
-                isFavorite ? "bg-yellow-500" : "bg-gray-700"
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorite();
-              }}
-            >
-              <GoStar className="w-6 h-6" />
-            </button>
-          </div>
+          <>
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <button
+                className={`rounded-full p-2 text-white transition duration-300 ${
+                  isFavorite ? "bg-yellow-500" : "bg-gray-700"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite();
+                }}
+              >
+                <GoStar className="w-6 h-6" />
+              </button>
+            </div>
+            {unAvailableIngredient && (
+              <div className="absolute bottom-0 left-0 right-0 bg-red-600 text-white text-center p-2">
+                Some of the ingredients in this recipe are not available in your
+                inventory
+              </div>
+            )}
+          </>
         )}
       </div>
       <div>
