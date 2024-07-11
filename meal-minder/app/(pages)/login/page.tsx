@@ -69,7 +69,8 @@ const Login = () => {
         storeTokens(
           response.data.access_token,
           response.data.refresh_token,
-          response.data.user.email
+          response.data.user.email,
+          response.data.user.username
         );
         // localStorage.setItem("token", response.data.access_token);
         router.push("/dashboard");

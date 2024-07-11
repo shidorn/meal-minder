@@ -28,6 +28,7 @@ interface RecipeProps {
   instruction: string;
   photo_path: string;
   cooking_time: string;
+  is_favorite: boolean;
   recipe_ingredients: Ingredient[];
 }
 
@@ -50,6 +51,7 @@ const Recipes: React.FC = () => {
     instruction: "",
     photo_path: "",
     cooking_time: "",
+    is_favorite: false,
     recipe_ingredients: [],
   });
   // const [newIngredient, setNewIngredient] = useState<Ingredient>({
@@ -85,6 +87,7 @@ const Recipes: React.FC = () => {
             recipes.push(item);
           }
         });
+        console.log(recipes);
         setRecipes((recipes) => [...recipes]);
       } catch (error) {
         console.log(error);
@@ -123,6 +126,7 @@ const Recipes: React.FC = () => {
       instruction: "",
       photo_path: "",
       cooking_time: "",
+      is_favorite: false,
       recipe_ingredients: [],
     });
     setImagePreview(null);
@@ -255,22 +259,40 @@ const Recipes: React.FC = () => {
       instruction: "",
       photo_path: "",
       cooking_time: "",
+      is_favorite: false,
       recipe_ingredients: [],
     });
     setIsModalOpen(false);
     setImagePreview(null);
   };
 
-  const toggleFavorite = (recipeId: string) => {
-    if (isRecipeFavorite(recipeId)) {
-      setFavoriteRecipes(favoriteRecipes.filter((id) => id !== recipeId));
-    } else {
-      setFavoriteRecipes([...favoriteRecipes, recipeId]);
-    }
+  const toggleFavorite = async (recipeId: string, is_favorite: boolean) => {
+    console.log(!is_favorite);
+    const data = {
+      is_favorite: !is_favorite,
+    };
+
+    setRecipes((prevRecipeList) => {
+      return prevRecipeList.map((recipe) => {
+        if (recipe.recipe_id === +recipeId) {
+          return {
+            ...recipe,
+            is_favorite: !recipe.is_favorite,
+          };
+        }
+        return recipe;
+      });
+    });
+
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/recipes/update-favorite/${recipeId}`,
+      data
+    );
   };
 
   const isRecipeFavorite = (recipeId: string) => {
-    return favoriteRecipes.includes(recipeId);
+    const recipe = recipes.find((recipe) => recipe.recipe_id === +recipeId);
+    return recipe ? recipe.is_favorite : false;
   };
 
   const handleSearch = (term: string) => {
@@ -291,11 +313,7 @@ const Recipes: React.FC = () => {
           <h1 className="text-3xl font-bold">Available Recipes</h1>
           <div className="flex items-center">
             <div className="mr-72">
-              <SearchBar
-                onSearch={() => {
-                  handleSearch;
-                }}
-              />
+              <SearchBar onSearch={handleSearch} />
             </div>
           </div>
         </div>
@@ -325,9 +343,12 @@ const Recipes: React.FC = () => {
                 cookingTime={recipe.cooking_time}
                 deleteRecipe={() => handleDeleteRecipe(recipe)}
                 toggleFavorite={() =>
-                  toggleFavorite(recipe.recipe_id.toString())
+                  toggleFavorite(
+                    recipe.recipe_id.toString(),
+                    recipe.is_favorite
+                  )
                 }
-                isFavorite={isRecipeFavorite(recipe.recipe_id.toString())}
+                is_favorite={isRecipeFavorite(recipe.recipe_id.toString())}
               />
             ))}
           </div>

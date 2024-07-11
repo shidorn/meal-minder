@@ -11,7 +11,7 @@ interface RecipeCardProps {
   cookingTime: string;
   deleteRecipe: (id: string) => void;
   toggleFavorite: () => void;
-  isFavorite: boolean;
+  is_favorite: boolean;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
@@ -22,10 +22,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   cookingTime,
   deleteRecipe,
   toggleFavorite,
-  isFavorite,
+  is_favorite,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -39,17 +40,19 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  // const handleShare = (platform: string) => {
-  //   const recipeUrl = `${window.location.origin}/recipe/${id}`;
-  //   if (platform === "copy") {
-  //     navigator.clipboard.writeText(recipeUrl);
-  //     alert("Link copied to clipboard!");
-  //   } else if (platform === "family") {
-  //     // Add your logic to share with family members here
-  //     alert("Shared with family members!");
-  //   }
-  //   setIsDropdownOpen(false);
-  // };
+  const handleShare = (platform: string) => {
+    const recipeUrl = `${window.location.origin}/recipe/${id}`;
+    if (platform === "copy") {
+      navigator.clipboard.writeText(recipeUrl);
+      alert("Link copied to clipboard!");
+    } else if (platform === "family") {
+      // Add your logic to share with family members here
+      alert("Shared with family members!");
+    }
+    setIsDropdownOpen(false);
+  };
+
+  const handleFavorite = {};
 
   return (
     <div
@@ -69,7 +72,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <button
               className={`rounded-full p-2 text-white transition duration-300 ${
-                isFavorite ? "bg-yellow-500" : "bg-gray-700"
+                is_favorite ? "bg-yellow-500" : "bg-gray-700"
               }`}
               onClick={toggleFavorite}
             >
@@ -97,7 +100,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       <div className="flex items-center justify-around p-2 text-sm relative">
         <div>
           <FaShare onClick={toggleDropdown} className="cursor-pointer" />
-          {/* {isDropdownOpen && (
+          {isDropdownOpen && (
             <div className="absolute top-full left-10 mt-2 w-40 bg-white border rounded shadow-lg z-10">
               <p
                 onClick={() => handleShare("copy")}
@@ -112,7 +115,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 Share with Family Members
               </p>
             </div>
-          )} */}
+          )}
         </div>
         <p>
           <GoStar

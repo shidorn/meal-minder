@@ -3,11 +3,13 @@ import axios from "axios";
 export const storeTokens = (
   accessToken: string,
   refreshToken: string,
-  email: string
+  email: string,
+  username: string
 ) => {
   localStorage.setItem("accessToken", accessToken);
   localStorage.setItem("refreshToken", refreshToken);
   localStorage.setItem("email", email);
+  localStorage.setItem("username", username);
 };
 
 export const getAccessToken = (): string | null =>
@@ -33,6 +35,8 @@ export const refreshToken = async (): Promise<void> => {
     console.log("Failed to refresh token", error);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("email");
+    localStorage.removeItem("username");
     window.location.href = "/login";
   }
 };
@@ -70,5 +74,9 @@ export const setupTokenExpirationCheck = (): void => {
 export const logout = (): void => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("first_name");
+  localStorage.removeItem("email");
+  localStorage.removeItem("username");
   window.location.href = "/login"; // Redirect to the login page
 };

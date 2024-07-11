@@ -8,9 +8,13 @@ export interface GroceryItem {
 }
 
 export interface Recipe {
-  id: number;
-  name: string;
-  image: string;
+  recipe_id: number;
+  recipe_name: string;
+  description: string;
+  instruction: string;
+  photo_path: string;
+  cooking_time: string;
+  is_favorite: boolean;
 }
 
 export interface FamilyMember {
