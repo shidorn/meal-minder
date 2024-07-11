@@ -5,6 +5,7 @@ import "./globals.css";
 import { GroceryProvider } from "@/context/GroceryContext";
 import { AuthProvider } from "@/app/utils/authContext";
 import { UserProvider } from "@/context/UserProvider";
+import { InventoryProvider } from "@/context/InventoryContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -20,11 +21,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={poppins.className}>
+<<<<<<< HEAD
         {/* <AuthProvider> */}
         <UserProvider>
           <GroceryProvider>{children}</GroceryProvider>
         </UserProvider>
         {/* </AuthProvider> */}
+=======
+        <AuthProvider>
+          <UserProvider>
+            <GroceryProvider>
+              <InventoryProvider>{children}</InventoryProvider>
+            </GroceryProvider>
+          </UserProvider>
+        </AuthProvider>
+>>>>>>> ec488d94204682815f9c4b0137e65af905810820
       </body>
     </html>
   );

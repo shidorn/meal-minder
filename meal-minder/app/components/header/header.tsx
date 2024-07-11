@@ -1,4 +1,3 @@
-"use client";
 import React, { useState, useEffect } from "react";
 import { FaBell } from "react-icons/fa";
 import Image from "next/image";
@@ -6,12 +5,22 @@ import { useRouter } from "next/navigation";
 // import { useUser } from "@/context/UserProvider";
 import { logout } from "@/app/auth";
 import { GoPersonFill, GoSignOut } from "react-icons/go";
+import Modal from "../modal/Modal";
 
 const Header: React.FC = () => {
   // const { user } = useUser();
   const router = useRouter();
   const [ProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notifDropdown, setNotifDropdown] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleOpenModal = () => {
+    setOpenModal(true); // Open the modal
+  };
+
+  const closeModal = () => {
+    setOpenModal(false); // Close the modal
+  };
 
   const handleProfileSectionClick = () => {
     setProfileDropdownOpen(!ProfileDropdownOpen);
@@ -19,10 +28,6 @@ const Header: React.FC = () => {
 
   const handleNotifClicked = () => {
     setNotifDropdown(!notifDropdown);
-  };
-
-  const closeNotifDropdown = () => {
-    setNotifDropdown(false);
   };
 
   const handleProfileClicked = () => {
@@ -36,7 +41,7 @@ const Header: React.FC = () => {
   // }, []);
 
   return (
-    <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-20">
+    <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-10">
       <div className="flex items-center gap-4">
         {localStorage.getItem("username")?.toString() && (
           <div className="relative">
@@ -100,7 +105,7 @@ const Header: React.FC = () => {
                 <a
                   href="#"
                   className="flex items-center gap-4 px-4 py-2 text-gray-800 hover:text-red-900 hover:bg-gray-50"
-                  onClick={logout}
+                  onClick={handleOpenModal}
                 >
                   <GoSignOut />
                   Logout
@@ -110,6 +115,28 @@ const Header: React.FC = () => {
           </div>
         )}
       </div>
+
+      <Modal isOpen={openModal} onClose={closeModal}>
+        <div className="flex flex-col gap-6 items-center">
+          <p>Are you sure you want to logout?</p>
+          <div className="flex space-x-2 mt-4 items-center justify-center gap-6">
+            <button
+              onClick={closeModal}
+              className="text-gray-500 hover:text-red-800"
+            >
+              No
+            </button>
+            <button
+              onClick={() => {
+                logout();
+              }}
+              className="p-2 w-20 text-white bg-red-800 hover:bg-red-900 rounded-lg"
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </Modal>
     </header>
   );
 };

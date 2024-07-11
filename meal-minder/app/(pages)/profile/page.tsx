@@ -1,19 +1,19 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import Layout from "@/app/components/Layout";
-import { useUser } from "@/context/UserProvider";
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import axios from "axios";
+import { useUser } from "@/context/UserProvider";
 
 const ProfilePage: React.FC = () => {
+  const { user, setUser } = useUser();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const { user, setUser } = useUser();
   const [formData, setFormData] = useState({
     username: user?.username || "",
     profileImage: user?.profileImage || "",
-    imageFile: null as File | null, // State to hold selected image file
+    imageFile: null as File | null,
   });
 
   const favoriteRecipes = [
@@ -64,10 +64,9 @@ const ProfilePage: React.FC = () => {
     if (e.target.files && e.target.files.length > 0) {
       setFormData({
         ...formData,
-        imageFile: e.target.files[0], // Set the selected file in state
+        imageFile: e.target.files[0],
       });
 
-      // Optionally, you can preview the selected image
       const reader = new FileReader();
       reader.onload = (event) => {
         const url = event.target?.result as string;
@@ -87,7 +86,7 @@ const ProfilePage: React.FC = () => {
       const formDataWithImage = new FormData();
       formDataWithImage.append("username", formData.username);
       if (formData.imageFile) {
-        formDataWithImage.append("image", formData.imageFile); // Append image only if it exists
+        formDataWithImage.append("image", formData.imageFile);
       }
 
       const response = await axios.put(
@@ -101,8 +100,8 @@ const ProfilePage: React.FC = () => {
         }
       );
 
-      setUser(response.data);
-      setIsEditing(false);
+      setUser(response.data); // Update user context with new data
+      setIsEditing(false); // Exit edit mode
       setLoading(false);
     } catch (error) {
       console.error("Failed to update profile", error);

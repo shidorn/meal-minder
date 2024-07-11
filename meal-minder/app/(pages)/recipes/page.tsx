@@ -190,10 +190,12 @@ const Recipes: React.FC = () => {
       reader.onloadend = () => {
         setImagePreview(reader.result);
         setFile(selectedFile);
-        newRecipe.photo_path = "/images/" + selectedFile.name;
-        // setNewRecipe((prev) => ({ ...prev, photo: reader.result as string }));
+        // Update the photo_path directly in the newRecipe state
+        setNewRecipe((prev) => ({
+          ...prev,
+          photo_path: `/images/${selectedFile.name}`, // Ensure the path is correct
+        }));
       };
-      console.log(selectedFile);
       reader.readAsDataURL(selectedFile);
     }
   };
@@ -201,6 +203,27 @@ const Recipes: React.FC = () => {
   const handleSaveRecipe = async () => {
     const newForm = removeProperty(newRecipe, "recipe_id");
     const newErrors: string[] = [];
+
+    if (
+      !newRecipe.recipe_name ||
+      !newRecipe.description ||
+      !newRecipe.instruction ||
+      newRecipe.recipe_ingredients.length === 0
+    ) {
+      alert("Please fill out all required fields.");
+      return;
+    }
+
+    const invalidIngredients = newRecipe.recipe_ingredients.some(
+      (ingredient) =>
+        !ingredient.ingredient_name || ingredient.ingredient_quantity <= 0
+    );
+    if (invalidIngredients) {
+      alert(
+        "Please fill out all ingredient names and ensure quantities are greater than 0."
+      );
+      return;
+    }
 
     newRecipe.recipe_ingredients.forEach((ingredient, index) => {
       if (ingredient.ingredient_quantity <= 0) {
@@ -301,11 +324,12 @@ const Recipes: React.FC = () => {
   };
 
   const isIngredientAvailable = (ingredientName: string) => {
-    return groceryItems.some(
-      (item) => item.name.toLowerCase() === ingredientName.toLowerCase()
+    const item = groceryItems.find(
+      (groceryItem) =>
+        groceryItem.name.toLowerCase() === ingredientName.toLowerCase()
     );
+    return !!item;
   };
-
   return (
     <Layout>
       <div className="container mx-auto p-4">
@@ -318,8 +342,11 @@ const Recipes: React.FC = () => {
           </div>
         </div>
         <hr className="mb-4" />
-        <div className="flex flex-col">
-          <div className="self-end">
+        <div className="flex flex-row items-center justify-between mb-6">
+          <div>
+            <SearchBar onSearch={handleSearch} />
+          </div>
+          <div>
             <button
               className="bg-red-900 hover:bg-red-800 text-white py-2 px-4 text-sm rounded"
               onClick={handleAddRecipe}
@@ -339,6 +366,8 @@ const Recipes: React.FC = () => {
                 id={recipe.recipe_id.toString()}
                 name={recipe.recipe_name}
                 ingredients={recipe.recipe_ingredients}
+                instruction={recipe.instruction}
+                description={recipe.description}
                 image={recipe.photo_path}
                 cookingTime={recipe.cooking_time}
                 deleteRecipe={() => handleDeleteRecipe(recipe)}
@@ -356,20 +385,35 @@ const Recipes: React.FC = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <div className="z-50">
+        <div className="z-50 p-6">
           <h2 className="text-2xl text-center text-red-900 font-bold mb-6">
             Add New Recipe
           </h2>
-          <div className="mb-4">
-            <label className="block text-gray-700">Recipe Name</label>
-            <input
-              type="text"
-              name="recipe_name"
-              value={newRecipe.recipe_name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="mb-4">
+              <label className="block text-gray-700">Recipe Name</label>
+              <input
+                type="text"
+                name="recipe_name"
+                value={newRecipe.recipe_name}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700">Cooking Time</label>
+              <input
+                type="text"
+                name="cooking_time"
+                value={newRecipe.cooking_time}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">Recipe Description</label>
             <input
@@ -380,6 +424,7 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">Instructions</label>
             <input
@@ -390,6 +435,7 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">Image</label>
             <input
@@ -399,7 +445,6 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
             {imagePreview && (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imagePreview as string}
                 alt="Preview"
@@ -407,54 +452,42 @@ const Recipes: React.FC = () => {
               />
             )}
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Cooking Time</label>
-            <input
-              type="text"
-              name="cooking_time"
-              value={newRecipe.cooking_time}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
 
           <div className="mb-4">
-            <h3 className="text-xl font-bold">Ingredients</h3>
-            {newRecipe.recipe_ingredients.map((ingredient, index) => (
-              <div key={index} className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={ingredient.ingredient_name}
-                  onChange={(e) =>
-                    handleIngredientChange(
-                      index,
-                      "ingredient_name",
-                      e.target.value
-                    )
-                  }
-                  className={`w-1/2 p-2 border rounded ${
-                    isIngredientAvailable(ingredient.ingredient_name)
-                      ? "border-green-500"
-                      : "border-red-500"
-                  }`}
-                  placeholder="Ingredient Name"
-                />
-                <input
-                  type="number"
-                  name="quantity"
-                  value={ingredient.ingredient_quantity}
-                  onChange={(e) =>
-                    handleIngredientChange(
-                      index,
-                      "ingredient_quantity",
-                      e.target.value
-                    )
-                  }
-                  className="w-1/2 p-2 border rounded"
-                  placeholder="Quantity"
-                />
-              </div>
-            ))}
+            <h3 className="text-xl font-bold mb-2">Ingredients</h3>
+            <div className="max-h-60 overflow-y-auto mb-4">
+              {newRecipe.recipe_ingredients.map((ingredient, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={ingredient.ingredient_name}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        index,
+                        "ingredient_name",
+                        e.target.value
+                      )
+                    }
+                    className="w-1/2 p-2 border rounded"
+                    placeholder="Ingredient Name"
+                  />
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={ingredient.ingredient_quantity}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        index,
+                        "ingredient_quantity",
+                        e.target.value
+                      )
+                    }
+                    className="w-1/2 p-2 border rounded"
+                    placeholder="Quantity"
+                  />
+                </div>
+              ))}
+            </div>
             <div className="flex gap-2 mb-2">
               <button
                 className="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 text-sm"
