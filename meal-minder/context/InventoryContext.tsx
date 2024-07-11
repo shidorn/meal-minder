@@ -1,3 +1,4 @@
+"use client";
 import React, {
   createContext,
   useContext,
@@ -54,7 +55,7 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({
       setupTokenExpirationCheck();
       const token = getAccessToken();
       if (!token) {
-        logout(); // Redirect to login if no token is available
+        logout();
         return;
       }
 
@@ -68,7 +69,7 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({
         setLoading(false);
       } catch (error) {
         console.log(error);
-        logout(); // Redirect to login if no token is available
+        logout();
         return;
       }
     };

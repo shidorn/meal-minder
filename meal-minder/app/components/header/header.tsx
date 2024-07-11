@@ -41,7 +41,7 @@ const Header: React.FC = () => {
   }, [user]);
 
   return (
-    <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-20">
+    <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-10">
       <div className="flex items-center gap-4">
         {user && (
           <div className="relative">

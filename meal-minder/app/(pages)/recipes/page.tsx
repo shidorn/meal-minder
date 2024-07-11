@@ -356,20 +356,35 @@ const Recipes: React.FC = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <div className="z-50">
+        <div className="z-50 p-6">
           <h2 className="text-2xl text-center text-red-900 font-bold mb-6">
             Add New Recipe
           </h2>
-          <div className="mb-4">
-            <label className="block text-gray-700">Recipe Name</label>
-            <input
-              type="text"
-              name="recipe_name"
-              value={newRecipe.recipe_name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="mb-4">
+              <label className="block text-gray-700">Recipe Name</label>
+              <input
+                type="text"
+                name="recipe_name"
+                value={newRecipe.recipe_name}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700">Cooking Time</label>
+              <input
+                type="text"
+                name="cooking_time"
+                value={newRecipe.cooking_time}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">Recipe Description</label>
             <input
@@ -380,6 +395,7 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">Instructions</label>
             <input
@@ -390,6 +406,7 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">Image</label>
             <input
@@ -399,7 +416,6 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
             {imagePreview && (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imagePreview as string}
                 alt="Preview"
@@ -407,20 +423,10 @@ const Recipes: React.FC = () => {
               />
             )}
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Cooking Time</label>
-            <input
-              type="text"
-              name="cooking_time"
-              value={newRecipe.cooking_time}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
 
           <div className="mb-4">
             <h3 className="text-xl font-bold mb-2">Ingredients</h3>
-            <div className="max-h-60 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto mb-4">
               {newRecipe.recipe_ingredients.map((ingredient, index) => (
                 <div key={index} className="flex gap-2 mb-2">
                   <input
@@ -433,11 +439,7 @@ const Recipes: React.FC = () => {
                         e.target.value
                       )
                     }
-                    className={`w-1/2 p-2 border rounded ${
-                      isIngredientAvailable(ingredient.ingredient_name)
-                        ? "border-green-500"
-                        : "border-red-500"
-                    }`}
+                    className="w-1/2 p-2 border rounded"
                     placeholder="Ingredient Name"
                   />
                   <input

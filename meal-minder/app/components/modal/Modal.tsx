@@ -14,7 +14,7 @@ const Modal: FC<ModalProps> = ({ isOpen, onClose, children }) => {
   return (
     <>
       {isOpen && (
-        <div className="fixed z-30 inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3">
             <div className="flex justify-end p-2">
               {/* <button

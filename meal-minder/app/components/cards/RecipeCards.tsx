@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { FaRegClock, FaShare, FaTrash } from "react-icons/fa";
 import { GoStar } from "react-icons/go";
+import { useInventory } from "@/context/InventoryContext";
 
 interface RecipeCardProps {
   id: string;
@@ -23,14 +24,15 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   image,
   cookingTime,
   instruction,
-  description, // Add instruction to destructured props
+  description,
   deleteRecipe,
   toggleFavorite,
   isFavorite,
 }) => {
+  const { inventory } = useInventory();
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [showInstruction, setShowInstruction] = useState(false); // Add state for instructions
+  const [showInstruction, setShowInstruction] = useState(false);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -53,7 +55,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       className="card grid grid-rows-2 mb-4 border rounded-lg shadow"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={toggleInstruction} // Toggle instructions on card click
+      onClick={toggleInstruction}
     >
       <div className="relative h-64 overflow-hidden rounded-t-lg mb-2">
         <Image
@@ -70,7 +72,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 isFavorite ? "bg-yellow-500" : "bg-gray-700"
               }`}
               onClick={(e) => {
-                e.stopPropagation(); // Prevent card click from firing
+                e.stopPropagation();
                 toggleFavorite();
               }}
             >
@@ -120,14 +122,14 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           <GoStar
             className={`cursor-pointer ${isFavorite ? "text-yellow-500" : ""}`}
             onClick={(e) => {
-              e.stopPropagation(); // Prevent card click from firing
+              e.stopPropagation();
               toggleFavorite();
             }}
           />
         </p>
         <p
           onClick={(e) => {
-            e.stopPropagation(); // Prevent card click from firing
+            e.stopPropagation();
             deleteRecipe(id);
           }}
           className="cursor-pointer"
