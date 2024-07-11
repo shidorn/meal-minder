@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useGroceryContext } from "@/context/GroceryContext";
+// import { useGroceryContext } from "@/context/GroceryContext";
 import RecipeCard from "@/app/components/cards/RecipeCards";
 import Modal from "@/app/components/modal/Modal";
 import { FaPlus } from "react-icons/fa";
@@ -34,7 +34,7 @@ interface RecipeProps {
 
 const Recipes: React.FC = () => {
   const router = useRouter();
-  const { groceryItems } = useGroceryContext();
+  // const { groceryItems } = useGroceryContext();
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [recipes, setRecipes] = useState<RecipeProps[]>([]);
@@ -98,20 +98,20 @@ const Recipes: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
-  const availableRecipes = recipes.filter((recipe) => {
-    return recipe.recipe_ingredients.every((ingredient) => {
-      const item = groceryItems.find(
-        (groceryItem) =>
-          groceryItem.name.toLowerCase() ===
-          ingredient.ingredient_name.toLowerCase()
-      );
-      return item && item.quantity >= ingredient.ingredient_quantity;
-    });
-  });
+  // const availableRecipes = recipes.filter((recipe) => {
+  //   return recipe.recipe_ingredients.every((ingredient) => {
+  //     const item = groceryItems.find(
+  //       (groceryItem) =>
+  //         groceryItem.name.toLowerCase() ===
+  //         ingredient.ingredient_name.toLowerCase()
+  //     );
+  //     return item && item.quantity >= ingredient.ingredient_quantity;
+  //   });
+  // });
 
-  const filteredRecipes = availableRecipes.filter((recipe) =>
-    recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredRecipes = availableRecipes.filter((recipe) =>
+  //   recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
   const handleAddRecipe = () => {
     setIsModalOpen(true);
@@ -323,23 +323,18 @@ const Recipes: React.FC = () => {
     setSearchTerm(term);
   };
 
-  const isIngredientAvailable = (ingredientName: string) => {
-    const item = groceryItems.find(
-      (groceryItem) =>
-        groceryItem.name.toLowerCase() === ingredientName.toLowerCase()
-    );
-    return !!item;
-  };
+  // const isIngredientAvailable = (ingredientName: string) => {
+  //   const item = groceryItems.find(
+  //     (groceryItem) =>
+  //       groceryItem.name.toLowerCase() === ingredientName.toLowerCase()
+  //   );
+  //   return !!item;
+  // };
   return (
     <Layout>
       <div className="container mx-auto p-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Available Recipes</h1>
-          <div className="flex items-center">
-            <div className="mr-72">
-              <SearchBar onSearch={handleSearch} />
-            </div>
-          </div>
         </div>
         <hr className="mb-4" />
         <div className="flex flex-row items-center justify-between mb-6">
@@ -445,6 +440,7 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
             {imagePreview && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imagePreview as string}
                 alt="Preview"

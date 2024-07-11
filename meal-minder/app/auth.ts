@@ -4,12 +4,16 @@ export const storeTokens = (
   accessToken: string,
   refreshToken: string,
   email: string,
-  username: string
+  username: string,
+  user_id: string,
+  photo_path: string
 ) => {
   localStorage.setItem("accessToken", accessToken);
   localStorage.setItem("refreshToken", refreshToken);
   localStorage.setItem("email", email);
   localStorage.setItem("username", username);
+  localStorage.setItem("user_id", user_id);
+  localStorage.setItem("photo_path", photo_path);
 };
 
 export const getAccessToken = (): string | null =>
@@ -37,6 +41,8 @@ export const refreshToken = async (): Promise<void> => {
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("email");
     localStorage.removeItem("username");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("photo_path");
     window.location.href = "/login";
   }
 };

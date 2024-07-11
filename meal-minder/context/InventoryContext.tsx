@@ -54,10 +54,10 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({
       checkTokenExpiration().catch(console.error);
       setupTokenExpirationCheck();
       const token = getAccessToken();
-      if (!token) {
-        logout();
-        return;
-      }
+      // if (!token) {
+      //   logout();
+      //   return;
+      // }
 
       try {
         const response = await axios.get(
@@ -73,6 +73,7 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({
         return;
       }
     };
+
     fetchData();
   }, []);
 

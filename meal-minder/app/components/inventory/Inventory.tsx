@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useGroceryContext } from "@/context/GroceryContext";
 import {
   checkTokenExpiration,
   getAccessToken,
@@ -22,7 +21,6 @@ interface GroceryItem {
 
 const Inventory: React.FC = () => {
   const router = useRouter();
-  const { groceryItems } = useGroceryContext();
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
