@@ -3,11 +3,13 @@ import axios from "axios";
 export const storeTokens = (
   accessToken: string,
   refreshToken: string,
-  email: string
+  email: string,
+  username: string
 ) => {
   localStorage.setItem("accessToken", accessToken);
   localStorage.setItem("refreshToken", refreshToken);
   localStorage.setItem("email", email);
+  localStorage.setItem("username", username);
 };
 
 export const getAccessToken = (): string | null =>
@@ -68,7 +70,7 @@ export const setupTokenExpirationCheck = (): void => {
 };
 
 export const logout = (): void => {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
+  // localStorage.removeItem("accessToken");
+  // localStorage.removeItem("refreshToken");
   window.location.href = "/login"; // Redirect to the login page
 };

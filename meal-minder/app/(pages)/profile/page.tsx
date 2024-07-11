@@ -4,15 +4,16 @@ import Layout from "@/app/components/Layout";
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import axios from "axios";
-import { useUser } from "@/context/UserProvider";
+// import { useUser } from "@/context/UserProvider";
 
 const ProfilePage: React.FC = () => {
-  const { user, setUser } = useUser();
+  // const { user, setUser } = useUser();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    username: user?.username || "",
-    profileImage: user?.profileImage || "",
+    username: localStorage.getItem("username") || "",
+    email: localStorage.getItem("email"),
+    profileImage: "/images/default-profile.jpg",
     imageFile: null as File | null,
   });
 
@@ -100,8 +101,8 @@ const ProfilePage: React.FC = () => {
         }
       );
 
-      setUser(response.data); // Update user context with new data
-      setIsEditing(false); // Exit edit mode
+      response.data;
+      setIsEditing(false);
       setLoading(false);
     } catch (error) {
       console.error("Failed to update profile", error);
@@ -114,7 +115,7 @@ const ProfilePage: React.FC = () => {
   return (
     <Layout>
       <div className="h-full p-4">
-        {user && (
+        {formData && (
           <div className="flex flex-col gap-6">
             <div className="mb-4">
               <h1 className="font-bold text-2xl">Your Profile</h1>
@@ -122,7 +123,7 @@ const ProfilePage: React.FC = () => {
             <div className="flex flex-col items-center gap-4 p-2">
               <span className="rounded-full shadow-lg">
                 <Image
-                  src={formData.profileImage || user.profileImage}
+                  src={formData.profileImage}
                   alt="profile"
                   width={200}
                   height={300}
@@ -164,9 +165,9 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <>
                     <p className="flex flex-col text-center text-xl font-medium">
-                      {user.username}{" "}
+                      {localStorage.getItem("username")}{" "}
                       <span className="text-sm text-gray-500">
-                        {user.email}
+                        {localStorage.getItem("email")}
                       </span>
                     </p>
 
