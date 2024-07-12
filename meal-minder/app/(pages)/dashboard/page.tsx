@@ -1,6 +1,6 @@
 "use client";
 import Layout from "@/app/components/Layout";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaStar, FaUserFriends, FaHeart } from "react-icons/fa";
 import { MdOutlineInventory } from "react-icons/md";
@@ -8,42 +8,61 @@ import { Recipe, FamilyMember } from "@/app/types/type";
 import Image from "next/image";
 import Inventory from "@/app/components/inventory/Inventory";
 import { Fa42Group, FaTeamspeak } from "react-icons/fa6";
+import {
+  checkTokenExpiration,
+  getAccessToken,
+  logout,
+  setupTokenExpirationCheck,
+} from "@/app/auth";
+import axios from "axios";
 
 const Dashboard = () => {
   const router = useRouter();
-  const [data, setData] = useState<any>(null);
-  // useEffect(() => {
-  //   checkTokenExpiration().catch(console.error);
-  //   setupTokenExpirationCheck();
-  //   const fetchData = async () => {
-  //     try {
-  //       const token = getAccessToken();
-  //       if (!token) {
-  //         logout(); // Redirect to login if no token is available
-  //         return;
-  //       }
-  //       const response = await axios.get(
-  //         process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/protected",
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-  //       setData(response.data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch data", error);
-  //     }
-  //   };
+  const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
+  const [recipes, setRecipes] = useState<Recipe>({
+    recipe_id: 0,
+    recipe_name: "",
+    description: "",
+    instruction: "",
+    photo_path: "",
+    cooking_time: "",
+    is_favorite: false,
+  });
 
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    checkTokenExpiration().catch(console.error);
+    setupTokenExpirationCheck();
+    const token = getAccessToken();
+    if (!token) {
+      logout(); // Redirect to login if no token is available
+      return;
+    }
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/get-favorites",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const responseData: Recipe[] = response.data;
+        const updatedFavoriteRecipes = [...favoriteRecipes];
+        const uniqueRecipe = new Set(
+          favoriteRecipes.map((data) => data.recipe_id)
+        );
+        responseData.forEach((data) => {
+          if (!uniqueRecipe.has(data.recipe_id)) {
+            updatedFavoriteRecipes.push(data);
+          }
+        });
+        setFavoriteRecipes(updatedFavoriteRecipes);
+        console.log(responseData);
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+      }
+    };
 
-  const favoriteRecipes: Recipe[] = [
-    { id: 1, name: "Spaghetti Carbonara", image: "/images/spaghetti.jpg" },
-    { id: 2, name: "Chocolate Chip Cookies", image: "/images/cookies.jpg" },
-    { id: 3, name: "Grilled Salmon", image: "/images/salmon.jpg" },
-  ];
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   const members: FamilyMember[] = [
     {
@@ -121,12 +140,19 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="grid grid-cols-2 self-center">
-                {favoriteRecipes.map((recipe) => (
-                  <div key={recipe.id} className=" flex items-center p-4 gap-4">
-                    <FaStar className="text-yellow-600" />
-                    <p className="text-md">{recipe.name}</p>
-                  </div>
-                ))}
+                {favoriteRecipes.length === 0 ? (
+                  <p>No Favorite Recipes Yet.</p>
+                ) : (
+                  favoriteRecipes.map((recipe) => (
+                    <div
+                      key={recipe.recipe_id}
+                      className=" flex items-center p-4 gap-4"
+                    >
+                      <FaStar className="text-yellow-600" />
+                      <p className="text-md">{recipe.recipe_name}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

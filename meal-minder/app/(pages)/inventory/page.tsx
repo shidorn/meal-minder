@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useGroceryContext } from "@/context/GroceryContext";
 import Pagination from "@/app/components/pagination/Pagination";
 import SearchBar from "@/app/components/search-bar/SearchBar";
 import {
@@ -24,7 +23,7 @@ interface GroceryItem {
 
 const Inventory = () => {
   const router = useRouter();
-  const { groceryItems } = useGroceryContext();
+  // const { groceryItems } = useGroceryContext();
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -51,7 +50,7 @@ const Inventory = () => {
         return;
       });
 
-    console.log(groceryItems);
+    // console.log(groceryItems);
     const fetchData = async () => {
       try {
         const response = await axios.get(

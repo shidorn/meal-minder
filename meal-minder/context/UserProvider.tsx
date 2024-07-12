@@ -27,15 +27,15 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const userData = await getUserDataFromAPI();
-      // console.log(userData);
-      setUser(userData);
-    };
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     const userData = await getUserDataFromAPI();
+  //     // console.log(userData);
+  //     setUser(userData);
+  //   };
 
-    fetchUserData();
-  }, []);
+  //   fetchUserData();
+  // }, []);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -53,23 +53,23 @@ export const useUser = (): UserContextType => {
   return context;
 };
 
-const getUserDataFromAPI = async (): Promise<User> => {
-  const email = {
-    userEmail: localStorage.getItem("email"),
-  };
-  const response = await axios.post(
-    process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/getUser",
-    email
-  );
-  // console.log(response.data.username);
-  localStorage.setItem("user_name", response.data.username);
-  localStorage.setItem("first_name", response.data.first_name);
-  return {
-    user_id: response.data.user_id,
-    username: response.data.username,
-    email: response.data.email,
-    first_name: response.data.first_name,
-    last_name: response.data.last_name,
-    profileImage: "/images/default-profile.jpg",
-  };
-};
+// const getUserDataFromAPI = async (): Promise<User> => {
+//   const email = {
+//     userEmail: localStorage.getItem("email"),
+//   };
+//   const response = await axios.post(
+//     process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/getUser",
+//     email
+//   );
+//   console.log(response.data.username);
+//   localStorage.setItem("user_name", response.data.username);
+//   localStorage.setItem("first_name", response.data.first_name);
+//   return {
+//     user_id: response.data.user_id,
+//     username: response.data.username,
+//     email: response.data.email,
+//     first_name: response.data.first_name,
+//     last_name: response.data.last_name,
+//     profileImage: "/images/default-profile.jpg",
+//   };
+// };

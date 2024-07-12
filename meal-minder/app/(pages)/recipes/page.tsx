@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Layout from "@/app/components/Layout";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useGroceryContext } from "@/context/GroceryContext";
+// import { useGroceryContext } from "@/context/GroceryContext";
 import RecipeCard from "@/app/components/cards/RecipeCards";
 import Modal from "@/app/components/modal/Modal";
 import { FaPlus } from "react-icons/fa";
@@ -28,12 +28,13 @@ interface RecipeProps {
   instruction: string;
   photo_path: string;
   cooking_time: string;
+  is_favorite: boolean;
   recipe_ingredients: Ingredient[];
 }
 
 const Recipes: React.FC = () => {
   const router = useRouter();
-  const { groceryItems } = useGroceryContext();
+  // const { groceryItems } = useGroceryContext();
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [recipes, setRecipes] = useState<RecipeProps[]>([]);
@@ -50,6 +51,7 @@ const Recipes: React.FC = () => {
     instruction: "",
     photo_path: "",
     cooking_time: "",
+    is_favorite: false,
     recipe_ingredients: [],
   });
   // const [newIngredient, setNewIngredient] = useState<Ingredient>({
@@ -85,6 +87,7 @@ const Recipes: React.FC = () => {
             recipes.push(item);
           }
         });
+        console.log(recipes);
         setRecipes((recipes) => [...recipes]);
       } catch (error) {
         console.log(error);
@@ -95,20 +98,20 @@ const Recipes: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
-  const availableRecipes = recipes.filter((recipe) => {
-    return recipe.recipe_ingredients.every((ingredient) => {
-      const item = groceryItems.find(
-        (groceryItem) =>
-          groceryItem.name.toLowerCase() ===
-          ingredient.ingredient_name.toLowerCase()
-      );
-      return item && item.quantity >= ingredient.ingredient_quantity;
-    });
-  });
+  // const availableRecipes = recipes.filter((recipe) => {
+  //   return recipe.recipe_ingredients.every((ingredient) => {
+  //     const item = groceryItems.find(
+  //       (groceryItem) =>
+  //         groceryItem.name.toLowerCase() ===
+  //         ingredient.ingredient_name.toLowerCase()
+  //     );
+  //     return item && item.quantity >= ingredient.ingredient_quantity;
+  //   });
+  // });
 
-  const filteredRecipes = availableRecipes.filter((recipe) =>
-    recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredRecipes = availableRecipes.filter((recipe) =>
+  //   recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
   const handleAddRecipe = () => {
     setIsModalOpen(true);
@@ -123,6 +126,7 @@ const Recipes: React.FC = () => {
       instruction: "",
       photo_path: "",
       cooking_time: "",
+      is_favorite: false,
       recipe_ingredients: [],
     });
     setImagePreview(null);
@@ -278,22 +282,40 @@ const Recipes: React.FC = () => {
       instruction: "",
       photo_path: "",
       cooking_time: "",
+      is_favorite: false,
       recipe_ingredients: [],
     });
     setIsModalOpen(false);
     setImagePreview(null);
   };
 
-  const toggleFavorite = (recipeId: string) => {
-    if (isRecipeFavorite(recipeId)) {
-      setFavoriteRecipes(favoriteRecipes.filter((id) => id !== recipeId));
-    } else {
-      setFavoriteRecipes([...favoriteRecipes, recipeId]);
-    }
+  const toggleFavorite = async (recipeId: string, is_favorite: boolean) => {
+    console.log(!is_favorite);
+    const data = {
+      is_favorite: !is_favorite,
+    };
+
+    setRecipes((prevRecipeList) => {
+      return prevRecipeList.map((recipe) => {
+        if (recipe.recipe_id === +recipeId) {
+          return {
+            ...recipe,
+            is_favorite: !recipe.is_favorite,
+          };
+        }
+        return recipe;
+      });
+    });
+
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/recipes/update-favorite/${recipeId}`,
+      data
+    );
   };
 
   const isRecipeFavorite = (recipeId: string) => {
-    return favoriteRecipes.includes(recipeId);
+    const recipe = recipes.find((recipe) => recipe.recipe_id === +recipeId);
+    return recipe ? recipe.is_favorite : false;
   };
 
   const handleSearch = (term: string) => {
@@ -301,19 +323,18 @@ const Recipes: React.FC = () => {
     setSearchTerm(term);
   };
 
-  const isIngredientAvailable = (ingredientName: string) => {
-    const item = groceryItems.find(
-      (groceryItem) =>
-        groceryItem.name.toLowerCase() === ingredientName.toLowerCase()
-    );
-    return !!item;
-  };
+  // const isIngredientAvailable = (ingredientName: string) => {
+  //   const item = groceryItems.find(
+  //     (groceryItem) =>
+  //       groceryItem.name.toLowerCase() === ingredientName.toLowerCase()
+  //   );
+  //   return !!item;
+  // };
   return (
     <Layout>
       <div className="container mx-auto p-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Available Recipes</h1>
-          <div className="flex items-center"></div>
         </div>
         <hr className="mb-4" />
         <div className="flex flex-row items-center justify-between mb-6">
@@ -346,9 +367,12 @@ const Recipes: React.FC = () => {
                 cookingTime={recipe.cooking_time}
                 deleteRecipe={() => handleDeleteRecipe(recipe)}
                 toggleFavorite={() =>
-                  toggleFavorite(recipe.recipe_id.toString())
+                  toggleFavorite(
+                    recipe.recipe_id.toString(),
+                    recipe.is_favorite
+                  )
                 }
-                isFavorite={isRecipeFavorite(recipe.recipe_id.toString())}
+                is_favorite={isRecipeFavorite(recipe.recipe_id.toString())}
               />
             ))}
           </div>
@@ -416,6 +440,7 @@ const Recipes: React.FC = () => {
               className="w-full p-2 border rounded"
             />
             {imagePreview && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imagePreview as string}
                 alt="Preview"

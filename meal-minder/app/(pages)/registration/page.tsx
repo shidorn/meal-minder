@@ -12,6 +12,7 @@ const Register = () => {
     username: "",
     email: "",
     password: "",
+    photo_path: "/images/default-profile.jpg",
   });
   const handleChange = (e: any) => {
     const { name, value } = e.target;

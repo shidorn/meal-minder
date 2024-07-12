@@ -1,20 +1,44 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/app/components/Layout";
 import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import axios from "axios";
+<<<<<<< HEAD
+=======
+import {
+  checkTokenExpiration,
+  getAccessToken,
+  logout,
+  setupTokenExpirationCheck,
+} from "@/app/auth";
+>>>>>>> 67f517d58ae90f9e78125a0c35cee86c3ba6b356
 // import { useUser } from "@/context/UserProvider";
 
 const ProfilePage: React.FC = () => {
   // const { user, setUser } = useUser();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
+    null
+  );
+
   const [formData, setFormData] = useState({
+<<<<<<< HEAD
     username: localStorage.getItem("username") || "",
     email: localStorage.getItem("email"),
     profileImage: "/images/default-profile.jpg",
+=======
+    user_id: parseInt(localStorage.getItem("user_id") || "0", 10),
+    username: localStorage.getItem("username")?.toString() || "",
+    password: "",
+    first_name: "",
+    last_name: "",
+    photo_path: "/images/default-profile.jpg",
+>>>>>>> 67f517d58ae90f9e78125a0c35cee86c3ba6b356
     imageFile: null as File | null,
+    email: localStorage.getItem("email")?.toString() || "",
   });
 
   const favoriteRecipes = [
@@ -54,6 +78,35 @@ const ProfilePage: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    checkTokenExpiration().catch(console.error);
+    setupTokenExpirationCheck();
+    const token = getAccessToken();
+    if (!token) {
+      logout(); // Redirect to login if no token is available
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const email = {
+          userEmail: localStorage.getItem("email"),
+        };
+        const response = await axios.post(
+          process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/getUser",
+          email
+        );
+        console.log(response.data);
+        setFormData({ ...formData, ...response.data });
+        console.log(formData);
+      } catch (error) {
+        console.log(error);
+        logout();
+      }
+    };
+    fetchData();
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -63,18 +116,20 @@ const ProfilePage: React.FC = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFormData({
-        ...formData,
-        imageFile: e.target.files[0],
-      });
+      const selectedFile = e.target.files?.[0];
+      // setFormData({
+      //   ...formData,
+      //   imageFile: e.target.files[0],
+      // });
 
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const url = event.target?.result as string;
-        setFormData({
-          ...formData,
-          profileImage: url,
-        });
+      reader.onload = () => {
+        setFile(selectedFile);
+        setImagePreview(reader.result);
+        setFormData((prev) => ({
+          ...prev,
+          photo_path: `/images/${selectedFile.name}`,
+        }));
       };
       reader.readAsDataURL(e.target.files[0]);
     }
@@ -84,25 +139,47 @@ const ProfilePage: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      const formDataWithImage = new FormData();
-      formDataWithImage.append("username", formData.username);
-      if (formData.imageFile) {
-        formDataWithImage.append("image", formData.imageFile);
-      }
-
+      console.log(formData);
       const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/update-profile`,
-        formDataWithImage,
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/updateUser`,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            // "Content-Type": "multipart/form-data",
           },
         }
       );
+      console.log(response);
+      if (!file) {
+        return;
+      }
 
+<<<<<<< HEAD
       response.data;
       setIsEditing(false);
+=======
+      const imgFile = new FormData();
+      console.log("imgFile", file);
+      imgFile.append("imgFile", file);
+      if (response.status === 200) {
+        try {
+          const response = await axios.post(
+            process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/image",
+            imgFile,
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+            }
+          );
+          console.log("image", response);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      // setUser(response.data); // Update user context with new data
+      setIsEditing(false); // Exit edit mode
+>>>>>>> 67f517d58ae90f9e78125a0c35cee86c3ba6b356
       setLoading(false);
     } catch (error) {
       console.error("Failed to update profile", error);
@@ -122,6 +199,7 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="flex flex-col items-center gap-4 p-2">
               <span className="rounded-full shadow-lg">
+<<<<<<< HEAD
                 <Image
                   src={formData.profileImage}
                   alt="profile"
@@ -129,6 +207,25 @@ const ProfilePage: React.FC = () => {
                   height={300}
                   className="rounded-full"
                 />
+=======
+                {imagePreview ? (
+                  <Image
+                    src={imagePreview as string}
+                    alt="profile"
+                    width={200}
+                    height={300}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <Image
+                    src={formData.photo_path}
+                    alt="profile"
+                    width={200}
+                    height={300}
+                    className="rounded-full"
+                  />
+                )}
+>>>>>>> 67f517d58ae90f9e78125a0c35cee86c3ba6b356
               </span>
               <div className="flex flex-col items-center gap-8">
                 {isEditing ? (
@@ -165,9 +262,15 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <>
                     <p className="flex flex-col text-center text-xl font-medium">
+<<<<<<< HEAD
                       {localStorage.getItem("username")}{" "}
                       <span className="text-sm text-gray-500">
                         {localStorage.getItem("email")}
+=======
+                      {formData.username}{" "}
+                      <span className="text-sm text-gray-500">
+                        {formData.email}
+>>>>>>> 67f517d58ae90f9e78125a0c35cee86c3ba6b356
                       </span>
                     </p>
 

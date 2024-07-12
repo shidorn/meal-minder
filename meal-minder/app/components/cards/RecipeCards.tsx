@@ -1,8 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { FaRegClock, FaShare, FaTrash } from "react-icons/fa";
 import { GoStar } from "react-icons/go";
-import { useInventory } from "@/context/InventoryContext";
+import {
+  checkTokenExpiration,
+  getAccessToken,
+  logout,
+  setupTokenExpirationCheck,
+} from "@/app/auth";
+import axios from "axios";
 
 interface RecipeCardProps {
   id: string;
@@ -14,7 +20,16 @@ interface RecipeCardProps {
   description: string;
   deleteRecipe: (id: string) => void;
   toggleFavorite: () => void;
-  isFavorite: boolean;
+  is_favorite: boolean;
+}
+
+interface GroceryItem {
+  item_id: number;
+  item_name: string;
+  item_quantity: number;
+  item_category: string;
+  user: { username: string };
+  is_purchased: boolean;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
@@ -27,9 +42,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   description,
   deleteRecipe,
   toggleFavorite,
-  isFavorite,
+  is_favorite,
 }) => {
-  const { inventory } = useInventory();
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showInstruction, setShowInstruction] = useState(false);
@@ -49,6 +63,36 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   const toggleInstruction = () => {
     setShowInstruction(!showInstruction);
   };
+  const [inventory, setInventory] = useState<GroceryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      checkTokenExpiration().catch(console.error);
+      setupTokenExpirationCheck();
+      const token = getAccessToken();
+      // if (!token) {
+      //   logout();
+      //   return;
+      // }
+
+      try {
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_API_ENDPOINT +
+            "/groceries/item-list-purchased",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log(response.data);
+        setInventory(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+        logout();
+        return;
+      }
+    };
+    fetchData();
+  }, []);
 
   const unAvailableIngredient = ingredients.some((ingredient) => {
     return !inventory.some(
@@ -81,7 +125,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
               <button
                 className={`rounded-full p-2 text-white transition duration-300 ${
-                  isFavorite ? "bg-yellow-500" : "bg-gray-700"
+                  is_favorite ? "bg-yellow-500" : "bg-gray-700"
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -139,7 +183,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         </div>
         <p>
           <GoStar
-            className={`cursor-pointer ${isFavorite ? "text-yellow-500" : ""}`}
+            className={`cursor-pointer ${is_favorite ? "text-yellow-500" : ""}`}
             onClick={(e) => {
               e.stopPropagation();
               toggleFavorite();

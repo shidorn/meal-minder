@@ -21,13 +21,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={poppins.className}>
-        <AuthProvider>
-          <UserProvider>
-            <GroceryProvider>
-              <InventoryProvider>{children}</InventoryProvider>
-            </GroceryProvider>
-          </UserProvider>
-        </AuthProvider>
+        {/* <AuthProvider> */}
+        {children}
+        {/* </AuthProvider> */}
       </body>
     </html>
   );

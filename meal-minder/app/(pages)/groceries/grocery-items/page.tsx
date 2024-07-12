@@ -39,7 +39,7 @@ const GroceryItemsPage = () => {
   const [itemsPerPage] = useState(10);
   const [editItemId, setEditItemId] = useState<number | null>(null);
   const searchParams = useSearchParams();
-  const user = localStorage.getItem("user_name")?.toString();
+  const user = localStorage.getItem("username")?.toString();
   const currentUser = { name: user };
   const listId = searchParams.get("id");
   const [searchTerm, setSearchTerm] = useState("");

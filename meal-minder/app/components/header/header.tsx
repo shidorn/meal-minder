@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import { FaBell } from "react-icons/fa";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-// import { useUser } from "@/context/UserProvider";
 import { logout } from "@/app/auth";
 import { GoPersonFill, GoSignOut } from "react-icons/go";
 import Modal from "../modal/Modal";
 
 const Header: React.FC = () => {
-  // const { user } = useUser();
   const router = useRouter();
   const [ProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notifDropdown, setNotifDropdown] = useState(false);
@@ -33,12 +31,6 @@ const Header: React.FC = () => {
   const handleProfileClicked = () => {
     router.push("/profile");
   };
-
-  // useEffect(() => {
-  //   if (typeof window !== "undefined") {
-  //     localStorage.setItem("user_id", user?.user_id ?? "");
-  //   }
-  // }, [user]);
 
   return (
     <header className="sticky top-0 w-full h-16 bg-white text-black flex items-center justify-end px-4 shadow-md z-10">
@@ -66,14 +58,17 @@ const Header: React.FC = () => {
               onClick={handleProfileSectionClick}
             >
               <Image
-                src={"/images/default-profile.jpg"}
+                src={
+                  localStorage.getItem("photo_path")?.toString() ||
+                  "/images/default-profile.jpg"
+                }
                 alt="User Profile"
                 width={32}
                 height={32}
                 className="rounded-full"
               />
               <span className="hidden md:block">
-                {localStorage.getItem("username")}
+                {localStorage.getItem("username")?.toString()}
               </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

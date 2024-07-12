@@ -73,6 +73,7 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({
         return;
       }
     };
+
     fetchData();
   }, []);
 
