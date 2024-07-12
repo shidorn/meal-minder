@@ -127,7 +127,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleProfileUpdate = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const token = localStorage.getItem("access_token");
       console.log(formData);
@@ -137,12 +137,14 @@ const ProfilePage: React.FC = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            // "Content-Type": "multipart/form-data",
           },
         }
       );
       console.log(response);
       if (!file) {
+        localStorage.setItem("username", response.data.username);
+        setIsEditing(false); // Exit edit mode
+        setLoading(false);
         return;
       }
 
