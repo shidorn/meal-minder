@@ -5,14 +5,17 @@ import Button from "@/app/components/buttons/button";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
+import { removeProperty } from "@/app/utils/removeProperty";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    family_member: "",
+    family_name: "",
+    family_id: null,
     username: "",
     email: "",
     password: "",
     photo_path: "/images/default-profile.jpg",
+    creator: "",
   });
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -34,8 +37,20 @@ const Register = () => {
   ) => {
     e.preventDefault();
     setLoading(true);
+    // let newForm = "";
     try {
-      console.log(formData);
+      // console.log(formData);
+      // if (!formData.family_name) {
+      //   formData.family_id = null;
+      //   newForm = removeProperty(formData, "family");
+      // } else {
+      //   const response = await axios.post(
+      //     process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/add-family",
+      //     formData
+      //   );
+      //   console.log(response);
+      // }
+
       const response = await axios.post(
         process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/register",
         formData
@@ -79,9 +94,9 @@ const Register = () => {
               Family <span className="text-xs text-gray-500">(Optional)</span>
             </label>
             <select
-              name="family_member"
+              name="family_name"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
-              value={formData.family_member}
+              value={formData.family_name}
               onChange={handleChange}
             >
               <option value="">Select your family</option>
