@@ -8,6 +8,7 @@ import { ClipLoader } from "react-spinners";
 
 const Register = () => {
   const [formData, setFormData] = useState({
+    family_member: "",
     username: "",
     email: "",
     password: "",
@@ -22,6 +23,7 @@ const Register = () => {
   };
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [isRequired, setIsRequired] = useState(true);
   const handleLoginClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     router.push("/login");
@@ -73,8 +75,23 @@ const Register = () => {
 
         <div className="flex flex-col items-center justify-center">
           <form className="flex flex-col gap-2 w-96">
-            <label htmlFor="" className="font-medium pl-2">
-              Name
+            <label htmlFor="family_member" className="font-medium pl-2">
+              Family <span className="text-xs text-gray-500">(Optional)</span>
+            </label>
+            <select
+              name="family_member"
+              className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
+              value={formData.family_member}
+              onChange={handleChange}
+            >
+              <option value="">Select your family</option>
+              <option value="Dela Cruz">Dela Cruz</option>
+              <option value="Bacalso">Bacalso</option>
+              <option value="Pitt">Pitt</option>
+            </select>
+
+            <label htmlFor="username" className="font-medium pl-2">
+              Username
             </label>
             <input
               type="text"
@@ -84,6 +101,7 @@ const Register = () => {
               value={formData.username}
               onChange={handleChange}
             />
+
             <label htmlFor="email" className="font-medium pl-2">
               Email
             </label>
@@ -95,6 +113,7 @@ const Register = () => {
               value={formData.email}
               onChange={handleChange}
             />
+
             <label htmlFor="password" className="font-medium pl-2">
               Password
             </label>
@@ -106,6 +125,7 @@ const Register = () => {
               value={formData.password}
               onChange={handleChange}
             />
+
             <a
               href=""
               className="text-red-900 hover:text-red-600 self-center"
@@ -113,6 +133,7 @@ const Register = () => {
             >
               Login
             </a>
+
             <Button
               title="Register"
               onClick={handleRegisterClick}

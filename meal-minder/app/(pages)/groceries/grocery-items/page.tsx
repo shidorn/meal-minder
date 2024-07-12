@@ -19,6 +19,7 @@ interface GroceryItem {
   item_id: number;
   item_name: string;
   item_quantity: number;
+  item_measurement_unit: string;
   item_category: string;
   user: { username: string };
   is_purchase: boolean;
@@ -31,6 +32,7 @@ const GroceryItemsPage = () => {
   const [formData, setFormData] = useState({
     item_name: "",
     item_quantity: 1,
+    item_measurement_unit: "",
     item_category: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
@@ -116,6 +118,7 @@ const GroceryItemsPage = () => {
     setFormData({
       item_name: "",
       item_quantity: 1,
+      item_measurement_unit: "",
       item_category: "",
     });
     setEditItemId(null);
@@ -129,7 +132,8 @@ const GroceryItemsPage = () => {
     if (
       !formData.item_name ||
       formData.item_quantity <= 0 ||
-      !formData.item_category
+      !formData.item_category ||
+      !formData.item_measurement_unit
     ) {
       alert("Please fill out all fields with valid values.");
       return;
@@ -153,6 +157,7 @@ const GroceryItemsPage = () => {
         item_name: formData.item_name,
         item_quantity: parseInt(formData.item_quantity.toString()),
         item_category: formData.item_category,
+        item_measurement_unit: formData.item_measurement_unit,
         grocery_id: parseInt(listId ?? ""),
         user_id: parseInt(localStorage.getItem("user_id") ?? ""),
       };
@@ -215,7 +220,10 @@ const GroceryItemsPage = () => {
   };
 
   const isFormValid = () =>
-    formData.item_name && formData.item_quantity > 0 && formData.item_category;
+    formData.item_name &&
+    formData.item_quantity > 0 &&
+    formData.item_category &&
+    formData.item_measurement_unit;
 
   const listsToRender = searchTerm.trim() === "" ? groceryItems : filteredItems;
 
@@ -268,6 +276,7 @@ const GroceryItemsPage = () => {
               <th className="py-2 px-4 text-left"></th>
               <th className="py-2 px-4 text-left">Name</th>
               <th className="py-2 px-4 text-left">Quantity</th>
+              <th className="py-2 px-4 text-left">Measurement Unit</th>
               <th className="py-2 px-4 text-left">Category</th>
               <th className="py-2 px-4 text-left">Added By</th>
               <th className="py-2 px-4 text-left">Actions</th>
@@ -294,6 +303,7 @@ const GroceryItemsPage = () => {
                 </td>
                 <td className="py-2 px-4">{item.item_name}</td>
                 <td className="py-2 px-4">{item.item_quantity}</td>
+                <td className="py-2 px-4">{item.item_measurement_unit}</td>
                 <td className="py-2 px-4">{item.item_category}</td>
                 <td className="py-2 px-4">
                   {item.user && item.user.username
@@ -363,6 +373,15 @@ const GroceryItemsPage = () => {
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
             />
             <input
+              className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
+              id="item_measurement_unit"
+              type="text"
+              name="item_measurement_unit"
+              placeholder="unit (eg., kg, mg, ml)"
+              value={formData.item_measurement_unit}
+              onChange={handleInputChange}
+            />
+            <input
               type="text"
               name="item_category"
               value={formData.item_category}
@@ -370,6 +389,7 @@ const GroceryItemsPage = () => {
               placeholder="Category"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
             />
+
             <input
               type="text"
               name="user_id"

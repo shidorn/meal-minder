@@ -13,11 +13,11 @@ const Header: React.FC = () => {
   const [openModal, setOpenModal] = useState(false);
 
   const handleOpenModal = () => {
-    setOpenModal(true); // Open the modal
+    setOpenModal(true);
   };
 
   const closeModal = () => {
-    setOpenModal(false); // Close the modal
+    setOpenModal(false);
   };
 
   const handleProfileSectionClick = () => {
