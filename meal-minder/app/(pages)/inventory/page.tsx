@@ -16,6 +16,7 @@ interface GroceryItem {
   item_id: number;
   item_name: string;
   item_quantity: number;
+  item_measurement: string;
   item_category: string;
   user: { username: string };
   is_purchased: boolean;
@@ -26,7 +27,7 @@ const Inventory = () => {
   // const { groceryItems } = useGroceryContext();
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(7);
   const [groceryItemsList, setGroceryItemsList] = useState<GroceryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -84,10 +85,39 @@ const Inventory = () => {
     setSearchTerm(term);
   };
 
-  const getStockLevel = (quantity: number): string => {
-    if (quantity < 2) return "Low";
-    if (quantity < 5) return "Average";
-    return "High";
+  const getStockLevel = (quantity: number, measurement: string): string => {
+    let convertedQuantity = quantity;
+
+    if (measurement.toLowerCase() === "mg") {
+      convertedQuantity = quantity / 1_000_000;
+    } else if (measurement.toLowerCase() === "ml") {
+      convertedQuantity = quantity / 1_000_000;
+    }
+
+    if (
+      measurement.toLowerCase() === "kg" ||
+      measurement.toLowerCase() === "mg"
+    ) {
+      if (convertedQuantity < 2) return "Low";
+      if (convertedQuantity < 5) return "Average";
+      return "High";
+    } else if (
+      measurement.toLowerCase() === "pieces" ||
+      measurement.toLowerCase() === "pcs"
+    ) {
+      if (quantity < 10) return "Low";
+      if (quantity < 20) return "Average";
+      return "High";
+    } else if (
+      measurement.toLowerCase() === "liter" ||
+      measurement.toLowerCase() === "millilitter" ||
+      measurement.toLowerCase() === "ml"
+    ) {
+      if (quantity < 2) return "Low";
+      if (quantity < 5) return "Average";
+      return "High";
+    }
+    return "Unknown";
   };
 
   // Function to aggregate quantities of items with the same name
@@ -107,8 +137,10 @@ const Inventory = () => {
 
   const aggregatedItems = aggregateQuantities(groceryItemsList);
 
-  const filteredItems = aggregatedItems.filter((item) =>
-    item.item_name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = aggregatedItems.filter(
+    (item) =>
+      item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.item_category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -159,20 +191,28 @@ const Inventory = () => {
               {currentItems.map((item) => (
                 <tr key={item.item_id} className="border-t border-dashed">
                   <td className="py-2 px-4">{item.item_name}</td>
-                  <td className="py-2 px-4">{item.item_quantity}</td>
+                  <td className="py-2 px-4">
+                    {item.item_quantity} {item.item_measurement}
+                  </td>
                   <td className="py-2 px-4">{item.item_category}</td>
                   <td className="py-2 px-4">{item.user.username}</td>
                   <td className="py-2 px-4">
                     <div
                       className={`py-2 px-4 text-white w-28 rounded-full text-center ${
-                        getStockLevel(item.item_quantity) === "Low"
+                        getStockLevel(
+                          item.item_quantity,
+                          item.item_measurement
+                        ) === "Low"
                           ? "bg-red-600"
-                          : getStockLevel(item.item_quantity) === "Average"
+                          : getStockLevel(
+                              item.item_quantity,
+                              item.item_measurement
+                            ) === "Average"
                           ? "bg-yellow-600"
                           : "bg-green-700"
                       }`}
                     >
-                      {getStockLevel(item.item_quantity)}
+                      {getStockLevel(item.item_quantity, item.item_measurement)}
                     </div>
                   </td>
                 </tr>

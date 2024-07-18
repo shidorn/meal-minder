@@ -65,9 +65,9 @@ const Header: React.FC = () => {
                 alt="User Profile"
                 width={32}
                 height={32}
-                className="rounded-full"
+                className="w-[40px] h-[40px] rounded-full"
               />
-              <span className="hidden md:block">
+              <span className="hidden md:block font-bold">
                 {localStorage.getItem("username")?.toString()}
               </span>
               <svg

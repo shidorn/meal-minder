@@ -23,7 +23,7 @@ const Inventory: React.FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(3);
+  const [itemsPerPage] = useState(2);
   const [groceryItemsList, setGroceryItemsList] = useState<GroceryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -138,7 +138,7 @@ const Inventory: React.FC = () => {
       {filteredItems.length === 0 ? (
         <p>No items purchased yet.</p>
       ) : (
-        <table className="min-w-full mt-10 bg-white shadow-md rounded-lg overflow-hidden mb-4">
+        <table className="min-w-full mt-4 bg-white shadow-md rounded-lg overflow-hidden mb-4">
           <thead className="bg-gray-200">
             <tr>
               <th className="py-2 px-4 text-left">Name</th>

@@ -11,14 +11,14 @@ import {
 import axios from "axios";
 
 interface RecipeCardProps {
-  id: string;
+  id: number;
   name: string;
-  ingredients: { ingredient_name: string; ingredient_quantity: number }[];
+  ingredients: { ingredient_name: string; ingredient_quantity: string }[];
   image: string;
   cookingTime: string;
   instruction: string;
   description: string;
-  deleteRecipe: (id: string) => void;
+  deleteRecipe: (id: number) => void;
   toggleFavorite: () => void;
   is_favorite: boolean;
 }
@@ -45,7 +45,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   is_favorite,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showInstruction, setShowInstruction] = useState(false);
 
   const handleMouseEnter = () => {
@@ -56,23 +55,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     setIsHovered(false);
   };
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
   const toggleInstruction = () => {
     setShowInstruction(!showInstruction);
   };
   const [inventory, setInventory] = useState<GroceryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const unAvailableIngredient = ingredients.some((ingredient) => {
-    return !inventory.some(
-      (item) =>
-        item.item_name.toLowerCase() ===
-          ingredient.ingredient_name.toLowerCase() &&
-        item.item_quantity >= ingredient.ingredient_quantity
-    );
-  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,20 +89,30 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     fetchData();
   }, []);
 
+  const unAvailableIngredient = ingredients.some((ingredient) => {
+    return !inventory.some(
+      (item) =>
+        item.item_name.toLowerCase() ===
+        ingredient.ingredient_name.toLowerCase()
+    );
+  });
+
   return (
     <div
-      className={`card grid grid-rows-2 mb-4 border rounded-lg shadow ${
+      className={`card grid grid-rows-2 mb-4 border rounded-lg shadow cursor max-w-[100%] ${
         unAvailableIngredient ? "border-red-500" : ""
       }`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={toggleInstruction}
     >
-      <div className="relative h-64 overflow-hidden rounded-t-lg mb-2">
+      <div className="relative h-64 overflow-hidden rounded-t-lg">
         <Image
           src={image}
           alt={`${name}`}
           layout="fill"
+          sizes="(max-width: 768px) 100vw, 33vw"
+          priority
           objectFit="cover"
           className="rounded-t-lg"
         />
@@ -160,11 +157,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         ) : (
           <>
             <h3 className="text-md mt-2 p-2">Ingredients:</h3>
-            <ul className="list-disc list-inside px-6 flex flex-col flex-wrap">
+            <ul className="list-disc list-inside max-h-40 px-6 flex flex-col flex-wrap gap-4">
               {ingredients.map((ingredient, index) => (
                 <li key={index}>
                   {ingredient.ingredient_name} -{" "}
-                  {ingredient.ingredient_quantity}
+                  {ingredient.ingredient_quantity}{" "}
                 </li>
               ))}
             </ul>
@@ -177,9 +174,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       <hr />
 
       <div className="flex items-center justify-around p-2 text-sm relative">
-        <div>
-          <FaShare onClick={toggleDropdown} className="cursor-pointer" />
-        </div>
         <p>
           <GoStar
             className={`cursor-pointer ${is_favorite ? "text-yellow-500" : ""}`}

@@ -148,7 +148,12 @@ const Dashboard = () => {
                       key={recipe.recipe_id}
                       className=" flex items-center p-4 gap-4"
                     >
-                      <FaStar className="text-yellow-600" />
+                      <Image
+                        src="/images/arcticons_recipe-keeper.png"
+                        alt="favorites"
+                        width={40}
+                        height={40}
+                      />
                       <p className="text-md">{recipe.recipe_name}</p>
                     </div>
                   ))

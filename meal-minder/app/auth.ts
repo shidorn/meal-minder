@@ -84,5 +84,6 @@ export const logout = (): void => {
   localStorage.removeItem("first_name");
   localStorage.removeItem("email");
   localStorage.removeItem("username");
+  localStorage.removeItem("photo_path");
   window.location.href = "/login"; // Redirect to the login page
 };

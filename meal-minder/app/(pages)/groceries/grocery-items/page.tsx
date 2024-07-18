@@ -19,7 +19,7 @@ interface GroceryItem {
   item_id: number;
   item_name: string;
   item_quantity: number;
-  item_measurement_unit: string;
+  item_measurement: string;
   item_category: string;
   user: { username: string };
   is_purchase: boolean;
@@ -32,7 +32,7 @@ const GroceryItemsPage = () => {
   const [formData, setFormData] = useState({
     item_name: "",
     item_quantity: 1,
-    item_measurement_unit: "",
+    item_measurement: "",
     item_category: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,25 +47,17 @@ const GroceryItemsPage = () => {
   const [listStatus, setListStatus] = useState<string>("");
 
   useEffect(() => {
-    checkTokenExpiration().catch(console.error);
-    setupTokenExpirationCheck();
-
-    if (searchTerm.trim() === "") {
-      setFilteredItems([]);
-    } else {
-      const filtered = groceryItems.filter((list) =>
-        list.item_name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredItems(filtered);
-    }
-
     const fetchData = async () => {
       try {
+        checkTokenExpiration().catch(console.error);
+        setupTokenExpirationCheck();
+
         const token = getAccessToken();
         if (!token) {
-          logout(); // Redirect to login if no token is available
+          logout();
           return;
         }
+
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/item-list/${listId}`,
           {
@@ -85,9 +77,8 @@ const GroceryItemsPage = () => {
         const updatedItems = [...unPurchasedItems, ...purchasedItems];
 
         setGroceryItems(updatedItems);
-        // setFilteredItems(updatedItems);
+        setFilteredItems(updatedItems);
 
-        // Fetch and set list status
         const statusResponse = await axios.get(
           `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/grocery-list-status/${listId}`,
           {
@@ -99,12 +90,25 @@ const GroceryItemsPage = () => {
         setListStatus(statusResponse.data[0].f0);
       } catch (error) {
         console.log(error);
-        // router.push("/login");
+        router.push("/login");
       }
     };
+
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router, listId, setFilteredItems, searchTerm]);
+  }, [router, listId]);
+
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredItems(groceryItems);
+    } else {
+      const filtered = groceryItems.filter(
+        (list) =>
+          list.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          list.item_category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredItems(filtered);
+    }
+  }, [searchTerm, groceryItems]);
 
   const openModal = () => {
     if (listStatus !== "DONE") {
@@ -118,7 +122,7 @@ const GroceryItemsPage = () => {
     setFormData({
       item_name: "",
       item_quantity: 1,
-      item_measurement_unit: "",
+      item_measurement: "",
       item_category: "",
     });
     setEditItemId(null);
@@ -132,10 +136,16 @@ const GroceryItemsPage = () => {
     if (
       !formData.item_name ||
       formData.item_quantity <= 0 ||
-      !formData.item_category ||
-      !formData.item_measurement_unit
+      !formData.item_measurement ||
+      !formData.item_category
     ) {
       alert("Please fill out all fields with valid values.");
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      logout();
       return;
     }
 
@@ -147,7 +157,12 @@ const GroceryItemsPage = () => {
       };
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/add-item`,
-        newItem
+        newItem,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       setGroceryItems([response.data, ...groceryItems]);
@@ -157,13 +172,18 @@ const GroceryItemsPage = () => {
         item_name: formData.item_name,
         item_quantity: parseInt(formData.item_quantity.toString()),
         item_category: formData.item_category,
-        item_measurement_unit: formData.item_measurement_unit,
+        item_measurement: formData.item_measurement,
         grocery_id: parseInt(listId ?? ""),
         user_id: parseInt(localStorage.getItem("user_id") ?? ""),
       };
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/update-item/${editItemId}`,
-        updateFormData
+        updateFormData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const updatedItems = groceryItems.map((item) =>
         item.item_id === editItemId ? { ...item, ...updateFormData } : item
@@ -189,69 +209,77 @@ const GroceryItemsPage = () => {
   };
 
   const handleDeleteItem = async (id: number) => {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/delete-item`,
-      { id }
-    );
-    setGroceryItems(groceryItems.filter((item) => item.item_id !== id));
+    const token = getAccessToken();
+    if (!token) {
+      logout();
+      return;
+    }
 
-    const updatedFilteredItems = filteredItems.filter(
-      (item) => item.item_id !== id
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/delete-item`,
+      { id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
-    setFilteredItems(updatedFilteredItems);
+
+    setGroceryItems(groceryItems.filter((item) => item.item_id !== id));
+    setFilteredItems(filteredItems.filter((item) => item.item_id !== id));
   };
 
   const handleCheckboxChange = async (id: number, status: boolean) => {
-    const response = await axios.post(
+    const token = getAccessToken();
+    if (!token) {
+      logout();
+      return;
+    }
+
+    await axios.post(
       `${process.env.NEXT_PUBLIC_API_ENDPOINT}/groceries/update-item-status/${id}`,
-      { is_purchase: !status }
+      { is_purchase: !status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
-    console.log(response);
+
     setGroceryItems(
       groceryItems.map((item) =>
         item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
       )
     );
 
-    const updatedFilteredItems = filteredItems.map((item) =>
-      item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
+    setFilteredItems(
+      filteredItems.map((item) =>
+        item.item_id === id ? { ...item, is_purchase: !item.is_purchase } : item
+      )
     );
-    setFilteredItems(updatedFilteredItems);
   };
 
   const isFormValid = () =>
     formData.item_name &&
     formData.item_quantity > 0 &&
-    formData.item_category &&
-    formData.item_measurement_unit;
+    formData.item_measurement &&
+    formData.item_category;
 
   const listsToRender = searchTerm.trim() === "" ? groceryItems : filteredItems;
 
-  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = listsToRender.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const totalPages = Math.ceil(listsToRender.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
   const handleSearch = (term: string) => {
-    console.log(term);
     setSearchTerm(term);
-    // setCurrentPage(1);
-    // const filtered = groceryItems.filter(
-    //   (item) =>
-    //     item.is_purchase &&
-    //     item.item_name.toLowerCase().includes(term.toLowerCase())
-    // );
-
-    // console.log(filtered);
-    // setFilteredItems(filtered);
   };
-
   return (
     <Layout>
       <div className="container mx-auto p-4">
@@ -303,7 +331,7 @@ const GroceryItemsPage = () => {
                 </td>
                 <td className="py-2 px-4">{item.item_name}</td>
                 <td className="py-2 px-4">{item.item_quantity}</td>
-                <td className="py-2 px-4">{item.item_measurement_unit}</td>
+                <td className="py-2 px-4">{item.item_measurement}</td>
                 <td className="py-2 px-4">{item.item_category}</td>
                 <td className="py-2 px-4">
                   {item.user && item.user.username
@@ -374,11 +402,11 @@ const GroceryItemsPage = () => {
             />
             <input
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md"
-              id="item_measurement_unit"
+              id="item_measurement"
               type="text"
-              name="item_measurement_unit"
+              name="item_measurement"
               placeholder="unit (eg., kg, mg, ml)"
-              value={formData.item_measurement_unit}
+              value={formData.item_measurement}
               onChange={handleInputChange}
             />
             <input

@@ -8,6 +8,9 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ClipLoader } from "react-spinners";
 import { storeTokens } from "@/app/auth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+
 // import Cookies from "js-cookie";
 
 const Login = () => {
@@ -15,6 +18,8 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData({
@@ -25,6 +30,9 @@ const Login = () => {
     setLoading(false);
   };
 
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
+  };
   const router = useRouter();
   const [isForgotPasswordModalVisible, setForgotPasswordModalVisible] =
     useState(false);
@@ -224,15 +232,26 @@ const Login = () => {
             <label htmlFor="password" className="font-medium pl-2">
               Password
             </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              onKeyPress={handlePassKeyPress}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                onKeyPress={handlePassKeyPress}
+              />
+              <span
+                className="absolute right-3 top-3 cursor-pointer"
+                onClick={togglePassword}
+              >
+                <FontAwesomeIcon
+                  icon={showPassword ? faEyeSlash : faEye}
+                  className="text-gray-600"
+                />
+              </span>
+            </div>
             {/* {errors.password && <p>{errors.password.message}</p>} */}
             {error && <p className="text-red-500">{error}</p>}
             <Button

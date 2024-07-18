@@ -7,6 +7,8 @@ import axios from "axios";
 import { ClipLoader } from "react-spinners";
 import Modal from "@/app/components/modal/Modal";
 import { removeProperty } from "@/app/utils/removeProperty";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 interface Families {
   family_id: number;
@@ -15,6 +17,8 @@ interface Families {
 }
 
 const Register = () => {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     family_name: "",
     username: "",
@@ -25,11 +29,17 @@ const Register = () => {
   });
 
   const [families, setFamilies] = useState<Families[]>([]);
-
   const [family, setFamily] = useState({
     creator: "",
     family_name: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -49,64 +59,83 @@ const Register = () => {
     }));
   };
 
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
   const handleLoginClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     router.push("/login");
   };
+
+  const validatePassword = (password: string) => {
+    const passRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passRegex.test(password);
+  };
+
   const handleRegisterClick = async (
     e: React.MouseEvent<HTMLAnchorElement>
   ) => {
     e.preventDefault();
     setLoading(true);
-    const removeFamilyName = removeProperty(formData, "family_name");
-    const newFormNoCreator = removeProperty(removeFamilyName, "creator");
+
+    if (
+      formData.username.trim() === "" ||
+      formData.email.trim() === "" ||
+      formData.password.trim() === ""
+    ) {
+      alert("Fill up required fields");
+    }
+
+    const { password } = formData;
+    if (!validatePassword(password)) {
+      alert(
+        "Password must contain at least one Uppercase letter, one Lowercase letter, one number, and one special character"
+      );
+      setLoading(false);
+      return;
+    }
+
+    const formDataNoFamily = removeProperty(formData, "family_name");
+    const formDataNoCreator = removeProperty(formDataNoFamily, "creator");
+
     try {
       const response = await axios.post(
-        process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/register",
-        newFormNoCreator
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,
+        formDataNoCreator
       );
       console.log(response);
       if (response.status === 201) {
-        // alert("Successfully Registered.");
         router.push("/login");
       } else {
         alert("Registration Failed.");
       }
-      setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error("Registration Failed:", error);
       alert("Registration Failed.");
+    } finally {
       setLoading(false);
-      return error;
     }
   };
 
   const handleModalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(family);
-    const response = await axios.post(
-      process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/add-family",
-      family
-    );
-
-    console.log(response);
-    setFamilies((prevFamilies) => [
-      ...prevFamilies,
-      {
-        family_id: response.data.family_id,
-        family_name: response.data.family_name,
-        creator: response.data.creator,
-      },
-    ]);
-    // setFamilies((prevFamilies) => [
-    //   ...prevFamilies,
-    //   { value: family.family_name, label: family.family_name },
-    // ]);
-    setIsModalVisible(false);
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/add-family`,
+        family
+      );
+      console.log(response.data);
+      setFamilies((prevFamilies) => [
+        ...prevFamilies,
+        {
+          family_id: response.data.family_id,
+          family_name: response.data.family_name,
+          creator: response.data.creator,
+        },
+      ]);
+      setIsModalVisible(false);
+    } catch (error) {
+      console.error("Failed to add family:", error);
+      alert("Failed to add family.");
+    }
   };
 
   const handleModal = () => {
@@ -121,22 +150,15 @@ const Register = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/get-families"
+          `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/get-families`
         );
         const respData: Families[] = response.data;
-        const uniqueFamilies = new Set(families.map((item) => item.family_id));
-        respData.forEach((item) => {
-          if (!uniqueFamilies.has(item.family_id)) {
-            families.push(item);
-          }
-        });
-        setFamilies((families) => [...families]);
-        console.log(respData);
+        setFamilies(respData);
       } catch (error) {
-        console.log(error);
-        return error;
+        console.error("Failed to fetch families:", error);
       }
     };
+
     fetchData();
   }, []);
 
@@ -152,7 +174,7 @@ const Register = () => {
       <div className="flex flex-col gap-8 p-6">
         <div>
           <h1 className="text-4xl font-medium text-blue-900">
-            Welcome <span className="text-blue-400">to MealMinder!</span>
+            Welcome <span className="text-blue-400">to GrocipEase!</span>
           </h1>
           <p className="pl-2">Create an account to begin your journey </p>
         </div>
@@ -188,7 +210,7 @@ const Register = () => {
             </label>
             <input
               type="text"
-              placeholder="Enter your full name"
+              placeholder="Enter your username"
               className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-4"
               name="username"
               value={formData.username}
@@ -210,14 +232,25 @@ const Register = () => {
             <label htmlFor="password" className="font-medium pl-2">
               Password
             </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                className="p-4 w-full text-sm border border-gray-300 rounded-md shadow-md mb-6"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              <span
+                className="absolute right-3 top-3 cursor-pointer"
+                onClick={togglePassword}
+              >
+                <FontAwesomeIcon
+                  icon={showPassword ? faEyeSlash : faEye}
+                  className="text-gray-600"
+                />
+              </span>
+            </div>
 
             <a
               href=""

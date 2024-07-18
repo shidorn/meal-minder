@@ -18,7 +18,7 @@ import { removeProperty } from "@/app/utils/removeProperty";
 
 interface Ingredient {
   ingredient_name: string;
-  ingredient_quantity: number;
+  ingredient_quantity: string;
 }
 
 interface RecipeProps {
@@ -35,10 +35,7 @@ interface RecipeProps {
 const Recipes: React.FC = () => {
   const router = useRouter();
   // const { groceryItems } = useGroceryContext();
-  const [errors, setErrors] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [recipes, setRecipes] = useState<RecipeProps[]>([]);
-  const [favoriteRecipes, setFavoriteRecipes] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeProps | null>(
@@ -88,7 +85,10 @@ const Recipes: React.FC = () => {
           }
         });
         console.log(recipes);
-        setRecipes((recipes) => [...recipes]);
+        const sortedRecipes = [...recipes].sort((a, b) =>
+          a.recipe_name.localeCompare(b.recipe_name)
+        );
+        setRecipes(sortedRecipes);
       } catch (error) {
         console.log(error);
         logout();
@@ -108,10 +108,6 @@ const Recipes: React.FC = () => {
   //     return item && item.quantity >= ingredient.ingredient_quantity;
   //   });
   // });
-
-  // const filteredRecipes = availableRecipes.filter((recipe) =>
-  //   recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
 
   const handleAddRecipe = () => {
     setIsModalOpen(true);
@@ -168,7 +164,7 @@ const Recipes: React.FC = () => {
       ...prev,
       recipe_ingredients: [
         ...prev.recipe_ingredients,
-        { ingredient_name: "", ingredient_quantity: 1 },
+        { ingredient_name: "", ingredient_quantity: "" },
       ],
     }));
   };
@@ -215,23 +211,20 @@ const Recipes: React.FC = () => {
     }
 
     const invalidIngredients = newRecipe.recipe_ingredients.some(
-      (ingredient) =>
-        !ingredient.ingredient_name || ingredient.ingredient_quantity <= 0
+      (ingredient) => !ingredient.ingredient_name
     );
     if (invalidIngredients) {
-      alert(
-        "Please fill out all ingredient names and ensure quantities are greater than 0."
-      );
+      alert("Please fill out all ingredient names");
       return;
     }
 
-    newRecipe.recipe_ingredients.forEach((ingredient, index) => {
-      if (ingredient.ingredient_quantity <= 0) {
-        newErrors.push(
-          `Ingredient ${index + 1} must have a quantity greater than 0.`
-        );
-      }
-    });
+    // newRecipe.recipe_ingredients.forEach((ingredient, index) => {
+    //   if (ingredient.ingredient_quantit) {
+    //     newErrors.push(
+    //       `Ingredient ${index + 1} must have a quantity greater than 0.`
+    //     );
+    //   }
+    // });
     console.log(newForm);
     const noIngredForm = removeProperty(newForm, "recipe_ingredients");
     console.log(noIngredForm);
@@ -241,9 +234,8 @@ const Recipes: React.FC = () => {
     );
     newRecipe.recipe_id = response.data.recipe_id;
     newRecipe.recipe_ingredients.forEach((ingredient) => {
-      ingredient.ingredient_quantity = parseInt(
-        ingredient.ingredient_quantity.toString()
-      );
+      ingredient.ingredient_quantity =
+        ingredient.ingredient_quantity.toString();
     });
     if (response.status === 201) {
       const response = await axios.post(
@@ -313,7 +305,7 @@ const Recipes: React.FC = () => {
     );
   };
 
-  const isRecipeFavorite = (recipeId: string) => {
+  const isRecipeFavorite = (recipeId: number) => {
     const recipe = recipes.find((recipe) => recipe.recipe_id === +recipeId);
     return recipe ? recipe.is_favorite : false;
   };
@@ -322,6 +314,9 @@ const Recipes: React.FC = () => {
     console.log(term);
     setSearchTerm(term);
   };
+  const filteredRecipes = recipes.filter((recipe) =>
+    recipe.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // const isIngredientAvailable = (ingredientName: string) => {
   //   const item = groceryItems.find(
@@ -351,14 +346,14 @@ const Recipes: React.FC = () => {
           </div>
         </div>
         {/* filteredRecipes */}
-        {recipes.length === 0 ? (
-          <p>No recipes can be made with the current inventory.</p>
+        {filteredRecipes.length === 0 ? (
+          <p>No recipes found.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recipes.map((recipe) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[30vh] overflow-y-auto md:max-h-[70vh]">
+            {filteredRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.recipe_id}
-                id={recipe.recipe_id.toString()}
+                id={recipe.recipe_id}
                 name={recipe.recipe_name}
                 ingredients={recipe.recipe_ingredients}
                 instruction={recipe.instruction}
@@ -372,7 +367,7 @@ const Recipes: React.FC = () => {
                     recipe.is_favorite
                   )
                 }
-                is_favorite={isRecipeFavorite(recipe.recipe_id.toString())}
+                is_favorite={isRecipeFavorite(recipe.recipe_id)}
               />
             ))}
           </div>
@@ -408,29 +403,29 @@ const Recipes: React.FC = () => {
               />
             </div>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="mb-4">
+              <label className="block text-gray-700">Recipe Description</label>
+              <input
+                type="text"
+                name="description"
+                value={newRecipe.description}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700">Recipe Description</label>
-            <input
-              type="text"
-              name="description"
-              value={newRecipe.description}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
+            <div className="mb-4">
+              <label className="block text-gray-700">Instructions</label>
+              <input
+                type="text"
+                name="instruction"
+                value={newRecipe.instruction}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            </div>
           </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700">Instructions</label>
-            <input
-              type="text"
-              name="instruction"
-              value={newRecipe.instruction}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-
           <div className="mb-4">
             <label className="block text-gray-700">Image</label>
             <input
@@ -451,7 +446,7 @@ const Recipes: React.FC = () => {
 
           <div className="mb-4">
             <h3 className="text-xl font-bold mb-2">Ingredients</h3>
-            <div className="max-h-60 overflow-y-auto mb-4">
+            <div className="max-h-28 overflow-y-auto mb-4">
               {newRecipe.recipe_ingredients.map((ingredient, index) => (
                 <div key={index} className="flex gap-2 mb-2">
                   <input
@@ -468,7 +463,7 @@ const Recipes: React.FC = () => {
                     placeholder="Ingredient Name"
                   />
                   <input
-                    type="number"
+                    type="text"
                     name="quantity"
                     value={ingredient.ingredient_quantity}
                     onChange={(e) =>

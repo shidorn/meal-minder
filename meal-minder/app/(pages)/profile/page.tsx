@@ -10,6 +10,8 @@ import {
   logout,
   setupTokenExpirationCheck,
 } from "@/app/auth";
+import { Recipe } from "@/app/types/type";
+import { useRouter } from "next/navigation";
 // import { useUser } from "@/context/UserProvider";
 
 const ProfilePage: React.FC = () => {
@@ -32,11 +34,51 @@ const ProfilePage: React.FC = () => {
     email: localStorage.getItem("email")?.toString() || "",
   });
 
-  const favoriteRecipes = [
-    { id: 1, name: "Spaghetti Carbonara", image: "/images/spaghetti.jpg" },
-    { id: 2, name: "Chocolate Chip Cookies", image: "/images/cookies.jpg" },
-    { id: 3, name: "Grilled Salmon", image: "/images/salmon.jpg" },
-  ];
+  const router = useRouter();
+  const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
+  const [recipes, setRecipes] = useState<Recipe>({
+    recipe_id: 0,
+    recipe_name: "",
+    description: "",
+    instruction: "",
+    photo_path: "",
+    cooking_time: "",
+    is_favorite: false,
+  });
+  useEffect(() => {
+    checkTokenExpiration().catch(console.error);
+    setupTokenExpirationCheck();
+    const token = getAccessToken();
+    if (!token) {
+      logout(); // Redirect to login if no token is available
+      return;
+    }
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_API_ENDPOINT + "/recipes/get-favorites",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const responseData: Recipe[] = response.data;
+        const updatedFavoriteRecipes = [...favoriteRecipes];
+        const uniqueRecipe = new Set(
+          favoriteRecipes.map((data) => data.recipe_id)
+        );
+        responseData.forEach((data) => {
+          if (!uniqueRecipe.has(data.recipe_id)) {
+            updatedFavoriteRecipes.push(data);
+          }
+        });
+        setFavoriteRecipes(updatedFavoriteRecipes);
+        console.log(responseData);
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+      }
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   const members = [
     {
@@ -168,6 +210,8 @@ const ProfilePage: React.FC = () => {
       }
 
       // setUser(response.data); // Update user context with new data
+      localStorage.setItem("photo_path", response.data.photo_path);
+      localStorage.setItem("username", response.data.username);
       setIsEditing(false); // Exit edit mode
       setLoading(false);
     } catch (error) {
@@ -193,16 +237,16 @@ const ProfilePage: React.FC = () => {
                     src={imagePreview as string}
                     alt="profile"
                     width={200}
-                    height={300}
-                    className="rounded-full"
+                    height={200}
+                    className="w-[200px] h-[200px] rounded-full"
                   />
                 ) : (
                   <Image
                     src={formData.photo_path}
                     alt="profile"
                     width={200}
-                    height={300}
-                    className="rounded-full"
+                    height={200}
+                    className="w-[200px] h-[200px] rounded-full"
                   />
                 )}
               </span>
@@ -285,15 +329,19 @@ const ProfilePage: React.FC = () => {
               <div>
                 <h1 className="font-semibold">Favorite Recipes</h1>
                 <div>
-                  {favoriteRecipes.map((recipe) => (
-                    <div
-                      key={recipe.id}
-                      className="flex items-center p-4 gap-4"
-                    >
-                      <FaStar className="text-yellow-600" />
-                      <p className="text-md">{recipe.name}</p>
-                    </div>
-                  ))}
+                  {favoriteRecipes.length === 0 ? (
+                    <p>No Favorite Recipes Yet.</p>
+                  ) : (
+                    favoriteRecipes.map((recipe) => (
+                      <div
+                        key={recipe.recipe_id}
+                        className=" flex items-center p-4 gap-4"
+                      >
+                        <FaStar className="text-yellow-600" />
+                        <p className="text-md">{recipe.recipe_name}</p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
